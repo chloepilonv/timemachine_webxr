@@ -137,3 +137,7 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Large splat/mesh assets (host externally or use Git LFS)
+public/splats/*.spz
+public/splats/*.glb

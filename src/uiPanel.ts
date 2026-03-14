@@ -9,11 +9,10 @@ import {
   UIKit,
 } from "@iwsdk/core";
 import * as THREE from "three";
+import { Era, WORLDS } from "./worlds.js";
+import { TimeMachineSystem } from "./timeMachineSystem.js";
 
 // Render UI on top of splats using AlwaysDepth + high renderOrder.
-// depthWrite stays true so the IWSDK laser pointer depth-tests correctly
-// against the panel surface (depthTest=false would break it).
-
 const UI_RENDER_ORDER = 10_000;
 const APPLIED_FLAG = "__uiDepthConfigApplied";
 
@@ -23,7 +22,6 @@ function configureUIMaterial(material: THREE.Material | null | undefined) {
   material.depthWrite = true;
   material.depthFunc = THREE.AlwaysDepth;
 
-  // Use texture alpha for images (e.g. logo) so transparent pixels don’t show black
   if (material instanceof THREE.MeshBasicMaterial && material.map) {
     material.transparent = true;
     material.alphaTest = 0.01;
@@ -44,7 +42,6 @@ function applyRenderOrderToObject(object3D: THREE.Object3D) {
         configureUIMaterial(obj.material);
       }
 
-      // Re-apply every render in case IWSDK replaces materials
       const originalOnBeforeRender = obj.onBeforeRender;
       obj.onBeforeRender = function (
         renderer,
@@ -71,11 +68,6 @@ function applyRenderOrderToObject(object3D: THREE.Object3D) {
   });
 }
 
-/**
- * Force an entity's UI meshes to render on top of Gaussian Splats.
- * Retries for up to 10 frames since IWSDK may not have built the
- * panel meshes yet at qualify time.
- */
 export function makeEntityRenderOnTop(entity: Entity): void {
   let attempts = 0;
 
@@ -86,10 +78,6 @@ export function makeEntityRenderOnTop(entity: Entity): void {
     }
     if (++attempts < 10) {
       requestAnimationFrame(tryApply);
-    } else {
-      console.warn(
-        `[Panel] makeEntityRenderOnTop: entity ${entity.index} had no object3D after 10 frames.`,
-      );
     }
   };
 
@@ -97,39 +85,112 @@ export function makeEntityRenderOnTop(entity: Entity): void {
 }
 
 export class PanelSystem extends createSystem({
-  sensaiPanel: {
+  tmPanel: {
     required: [PanelUI, PanelDocument],
-    where: [eq(PanelUI, "config", "./ui/sensai.json")],
+    where: [eq(PanelUI, "config", "./ui/timemachine.json")],
   },
 }) {
   init() {
-    // replayExisting: true so we run setup for entities that already qualified
-    // (e.g. when PanelDocument loads before or in the same tick as init).
-    this.queries.sensaiPanel.subscribe("qualify", (entity) => {
-      makeEntityRenderOnTop(entity);
+    this.queries.tmPanel.subscribe(
+      "qualify",
+      (entity) => {
+        makeEntityRenderOnTop(entity);
 
-      const document = PanelDocument.data.document[
-        entity.index
-      ] as UIKitDocument;
-      if (!document) return;
+        const document = PanelDocument.data.document[
+          entity.index
+        ] as UIKitDocument;
+        if (!document) return;
 
-      const xrButton = document.getElementById("xr-button") as UIKit.Text;
-      xrButton.addEventListener("click", () => {
-        if (this.world.visibilityState.value === VisibilityState.NonImmersive) {
-          this.world.launchXR();
-        } else {
-          this.world.exitXR();
-        }
-      });
+        const timeMachine = this.world.getSystem(TimeMachineSystem)!;
 
-      this.world.visibilityState.subscribe((visibilityState) => {
-        xrButton.setProperties({
-          text:
-            visibilityState === VisibilityState.NonImmersive
-              ? "Enter XR"
-              : "Exit to Browser",
+        // --- XR button ---
+        const xrButton = document.getElementById("xr-button") as UIKit.Text;
+        xrButton.addEventListener("click", () => {
+          if (
+            this.world.visibilityState.value === VisibilityState.NonImmersive
+          ) {
+            this.world.launchXR();
+          } else {
+            this.world.exitXR();
+          }
         });
-      });
-    }, true);
+
+        this.world.visibilityState.subscribe((state) => {
+          xrButton.setProperties({
+            text:
+              state === VisibilityState.NonImmersive
+                ? "Enter XR"
+                : "Exit to Browser",
+          });
+        });
+
+        // --- Era labels ---
+        const eraLabel = document.getElementById("era-label") as UIKit.Text;
+        const yearLabel = document.getElementById("year-label") as UIKit.Text;
+        const eraPast = document.getElementById("era-past") as UIKit.Text;
+        const eraPresent = document.getElementById(
+          "era-present",
+        ) as UIKit.Text;
+        const eraFuture = document.getElementById("era-future") as UIKit.Text;
+
+        const eraButtons: Record<Era, UIKit.Text> = {
+          past: eraPast,
+          present: eraPresent,
+          future: eraFuture,
+        };
+
+        const updateUI = (era: Era) => {
+          const w = WORLDS[era];
+          eraLabel.setProperties({ text: w.label });
+          yearLabel.setProperties({ text: w.year });
+
+          // Update active state styling
+          for (const [key, btn] of Object.entries(eraButtons)) {
+            btn.setProperties({
+              style: {
+                backgroundColor:
+                  key === era ? "#7b2ff2" : "#1a1a2e",
+                borderColor:
+                  key === era ? "#9b5ff8" : "#444466",
+                color: key === era ? "#ffffff" : "#a0a0b0",
+                fontWeight: key === era ? "bold" : "normal",
+              },
+            });
+          }
+        };
+
+        timeMachine.setEraChangeCallback(updateUI);
+
+        // --- Navigation buttons ---
+        const prevButton = document.getElementById(
+          "prev-button",
+        ) as UIKit.Text;
+        const nextButton = document.getElementById(
+          "next-button",
+        ) as UIKit.Text;
+
+        prevButton.addEventListener("click", () => {
+          timeMachine.prev();
+        });
+
+        nextButton.addEventListener("click", () => {
+          timeMachine.next();
+        });
+
+        // --- Direct era buttons ---
+        eraPast.addEventListener("click", () => {
+          timeMachine.switchTo("past");
+        });
+
+        eraPresent.addEventListener("click", () => {
+          timeMachine.switchTo("present");
+        });
+
+        eraFuture.addEventListener("click", () => {
+          timeMachine.switchTo("future");
+        });
+      },
+      true,
+    );
   }
 }

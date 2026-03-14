@@ -14,8 +14,12 @@ import {
   World,
 } from "@iwsdk/core";
 import { PanelSystem } from "./uiPanel.js";
-import { GaussianSplatLoader, GaussianSplatLoaderSystem,} from "./gaussianSplatLoader.js";
-import { spawnHologramSphere } from "./interactableExample.js";
+import {
+  GaussianSplatLoader,
+  GaussianSplatLoaderSystem,
+} from "./gaussianSplatLoader.js";
+import { TimeMachineSystem } from "./timeMachineSystem.js";
+import { WORLDS } from "./worlds.js";
 
 
 // ------------------------------------------------------------
@@ -45,14 +49,23 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 
     world
       .registerSystem(PanelSystem)
-      .registerSystem(GaussianSplatLoaderSystem);
+      .registerSystem(GaussianSplatLoaderSystem)
+      .registerSystem(TimeMachineSystem);
 
 
     // ------------------------------------------------------------
-    // Gaussian Splat
+    // Gaussian Splat — starts with the present-day world
     // ------------------------------------------------------------
+    const presentWorld = WORLDS.present;
     const splatEntity = world.createTransformEntity();
-    splatEntity.addComponent(GaussianSplatLoader);
+    splatEntity.addComponent(GaussianSplatLoader, {
+      splatUrl: presentWorld.splatUrl,
+      meshUrl: presentWorld.meshUrl,
+      autoLoad: true,
+      animate: false,
+      enableLod: true,
+      lodSplatScale: 1.0,
+    });
 
     const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
 
@@ -65,9 +78,9 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       }
     });
 
-    
+
     // ------------------------------------------------------------
-    // Invisible floor for locomotion (must be a Mesh for IWSDK raycasting)
+    // Invisible floor for locomotion
     // ------------------------------------------------------------
     const floorGeometry = new PlaneGeometry(100, 100);
     floorGeometry.rotateX(-Math.PI / 2);
@@ -84,18 +97,12 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 
 
     // ------------------------------------------------------------
-    // Hologram Sphere (distance-grabbable, translate in place)
-    // ------------------------------------------------------------
-    spawnHologramSphere(world);
-
-
-    // ------------------------------------------------------------
-    // Panel UI (centered on screen in desktop, positioned in 3D for XR)
+    // Panel UI — Time Machine controls
     // ------------------------------------------------------------
     const panelEntity = world
       .createTransformEntity()
       .addComponent(PanelUI, {
-        config: "./ui/sensai.json",
+        config: "./ui/timemachine.json",
         maxHeight: 0.8,
         maxWidth: 1.6,
       })
@@ -109,11 +116,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
         width: "40%",
       });
     panelEntity.object3D!.position.set(0, 1.29, -1.9);
-
   })
   .catch((err) => {
     console.error("[World] Failed to create the IWSDK world:", err);
-    const container = document.getElementById("scene-container");
   });
-
-  

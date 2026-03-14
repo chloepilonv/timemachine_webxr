@@ -41,7 +41,7 @@ function deduplicateThree(): Plugin {
 export default defineConfig({
   plugins: [
     deduplicateThree(),
-    mkcert(),
+    // mkcert(), // disabled — run `mkcert -install` manually if HTTPS is needed
     injectIWER({
       device: "metaQuest3",
       activation: "localhost",

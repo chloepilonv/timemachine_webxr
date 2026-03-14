@@ -1,0 +1,639 @@
+{
+  "element": {
+    "type": "container",
+    "sourceTag": "div",
+    "children": [
+      {
+        "sourceTag": "span",
+        "type": "custom",
+        "children": [
+          "TIME MACHINE"
+        ],
+        "properties": {
+          "class": "title"
+        },
+        "dataUid": "uid-2"
+      },
+      {
+        "sourceTag": "span",
+        "type": "custom",
+        "children": [
+          "San Francisco Ferry Building"
+        ],
+        "properties": {
+          "class": "subtitle"
+        },
+        "dataUid": "uid-3"
+      },
+      {
+        "type": "container",
+        "sourceTag": "div",
+        "children": [],
+        "properties": {
+          "class": "divider"
+        },
+        "dataUid": "uid-4"
+      },
+      {
+        "sourceTag": "span",
+        "type": "custom",
+        "children": [
+          "Present"
+        ],
+        "properties": {
+          "id": "era-label",
+          "class": "era-label"
+        },
+        "dataUid": "uid-5"
+      },
+      {
+        "sourceTag": "span",
+        "type": "custom",
+        "children": [
+          "2025"
+        ],
+        "properties": {
+          "id": "year-label",
+          "class": "year-label"
+        },
+        "dataUid": "uid-6"
+      },
+      {
+        "type": "container",
+        "sourceTag": "div",
+        "children": [
+          {
+            "sourceTag": "button",
+            "type": "custom",
+            "children": [
+              "<< Past"
+            ],
+            "properties": {
+              "id": "prev-button",
+              "class": "nav-button"
+            },
+            "dataUid": "uid-8"
+          },
+          {
+            "sourceTag": "button",
+            "type": "custom",
+            "children": [
+              "Future >>"
+            ],
+            "properties": {
+              "id": "next-button",
+              "class": "nav-button"
+            },
+            "dataUid": "uid-9"
+          }
+        ],
+        "properties": {
+          "class": "nav-row"
+        },
+        "dataUid": "uid-7"
+      },
+      {
+        "type": "container",
+        "sourceTag": "div",
+        "children": [
+          {
+            "sourceTag": "button",
+            "type": "custom",
+            "children": [
+              "1920s"
+            ],
+            "properties": {
+              "id": "era-past",
+              "class": "era-button"
+            },
+            "dataUid": "uid-11"
+          },
+          {
+            "sourceTag": "button",
+            "type": "custom",
+            "children": [
+              "Present"
+            ],
+            "properties": {
+              "id": "era-present",
+              "class": "era-button-active"
+            },
+            "dataUid": "uid-12"
+          },
+          {
+            "sourceTag": "button",
+            "type": "custom",
+            "children": [
+              "Future"
+            ],
+            "properties": {
+              "id": "era-future",
+              "class": "era-button"
+            },
+            "dataUid": "uid-13"
+          }
+        ],
+        "properties": {
+          "class": "era-row"
+        },
+        "dataUid": "uid-10"
+      },
+      {
+        "type": "container",
+        "sourceTag": "div",
+        "children": [],
+        "properties": {
+          "class": "divider-thin"
+        },
+        "dataUid": "uid-14"
+      },
+      {
+        "sourceTag": "button",
+        "type": "custom",
+        "children": [
+          "Enter XR"
+        ],
+        "properties": {
+          "id": "xr-button"
+        },
+        "dataUid": "uid-15"
+      },
+      {
+        "sourceTag": "span",
+        "type": "custom",
+        "children": [
+          "Embarcadero, SF"
+        ],
+        "properties": {
+          "class": "location"
+        },
+        "dataUid": "uid-16"
+      }
+    ],
+    "properties": {
+      "class": "panel-container"
+    },
+    "dataUid": "uid-1"
+  },
+  "classes": {
+    "panel-container": {
+      "content": {
+        "alignItems": "center",
+        "padding": "3",
+        "width": "50",
+        "display": "flex",
+        "flexDirection": "column",
+        "backgroundColor": "rgba(8, 8, 20, 0.92)",
+        "borderColor": "#7b2ff2",
+        "borderWidth": "0.2",
+        "borderRadius": 2
+      }
+    },
+    "title": {
+      "content": {
+        "fontSize": "3",
+        "color": "#ffffff",
+        "textAlign": "center",
+        "fontWeight": "bold",
+        "letterSpacing": "0.15"
+      }
+    },
+    "subtitle": {
+      "content": {
+        "fontSize": "1.6",
+        "color": "#a0a0b0",
+        "textAlign": "center",
+        "marginTop": "0.3"
+      }
+    },
+    "divider": {
+      "content": {
+        "width": "90%",
+        "height": "0.08",
+        "marginTop": "1.5",
+        "marginBottom": "1.5",
+        "backgroundColor": "#333355"
+      }
+    },
+    "era-label": {
+      "content": {
+        "fontSize": "4",
+        "color": "#ffffff",
+        "textAlign": "center",
+        "fontWeight": "bold",
+        "marginBottom": "0.5"
+      }
+    },
+    "year-label": {
+      "content": {
+        "fontSize": "2",
+        "color": "#c4b5fd",
+        "textAlign": "center",
+        "marginBottom": "1.5"
+      }
+    },
+    "nav-row": {
+      "content": {
+        "display": "flex",
+        "flexDirection": "row",
+        "width": "100%",
+        "justifyContent": "center",
+        "gap": "1.5"
+      }
+    },
+    "nav-button": {
+      "content": {
+        "paddingTop": "1.2",
+        "paddingBottom": "1.2",
+        "paddingLeft": "3",
+        "paddingRight": "3",
+        "backgroundColor": "#1a1a2e",
+        "borderColor": "#7b2ff2",
+        "borderWidth": "0.15",
+        "borderRadius": 1.2,
+        "color": "#ffffff",
+        "fontSize": "2.2",
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "cursor": "pointer"
+      }
+    },
+    "era-row": {
+      "content": {
+        "display": "flex",
+        "flexDirection": "row",
+        "width": "100%",
+        "justifyContent": "center",
+        "gap": "1",
+        "marginTop": "1.5"
+      }
+    },
+    "era-button": {
+      "content": {
+        "paddingTop": "1",
+        "paddingBottom": "1",
+        "paddingLeft": "2",
+        "paddingRight": "2",
+        "backgroundColor": "#1a1a2e",
+        "borderColor": "#444466",
+        "borderWidth": "0.12",
+        "borderRadius": 1,
+        "color": "#a0a0b0",
+        "fontSize": "1.6",
+        "textAlign": "center",
+        "cursor": "pointer"
+      }
+    },
+    "era-button-active": {
+      "content": {
+        "paddingTop": "1",
+        "paddingBottom": "1",
+        "paddingLeft": "2",
+        "paddingRight": "2",
+        "backgroundColor": "#7b2ff2",
+        "borderColor": "#9b5ff8",
+        "borderWidth": "0.12",
+        "borderRadius": 1,
+        "color": "#ffffff",
+        "fontSize": "1.6",
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "cursor": "pointer"
+      }
+    },
+    "divider-thin": {
+      "content": {
+        "width": "80%",
+        "height": "0.06",
+        "marginTop": "1.5",
+        "marginBottom": "1",
+        "backgroundColor": "#222244"
+      }
+    },
+    "location": {
+      "content": {
+        "fontSize": "1.3",
+        "color": "#666680",
+        "textAlign": "center",
+        "marginTop": "0.5"
+      }
+    },
+    "__id__xr-button": {
+      "content": {
+        "width": "100%",
+        "padding": "1.2",
+        "marginTop": "1",
+        "backgroundColor": "#fbbf24",
+        "color": "#0d0221",
+        "borderRadius": 1.2,
+        "borderWidth": "0",
+        "fontSize": "2",
+        "fontWeight": "bold",
+        "textAlign": "center",
+        "cursor": "pointer"
+      }
+    }
+  },
+  "ranges": {
+    "panel-container": {
+      "start": {
+        "line": 1,
+        "column": 2
+      },
+      "end": {
+        "line": 1,
+        "column": 18
+      }
+    },
+    "title": {
+      "start": {
+        "line": 13,
+        "column": 2
+      },
+      "end": {
+        "line": 13,
+        "column": 8
+      }
+    },
+    "subtitle": {
+      "start": {
+        "line": 21,
+        "column": 2
+      },
+      "end": {
+        "line": 21,
+        "column": 11
+      }
+    },
+    "divider": {
+      "start": {
+        "line": 28,
+        "column": 2
+      },
+      "end": {
+        "line": 28,
+        "column": 10
+      }
+    },
+    "era-label": {
+      "start": {
+        "line": 36,
+        "column": 2
+      },
+      "end": {
+        "line": 36,
+        "column": 12
+      }
+    },
+    "year-label": {
+      "start": {
+        "line": 44,
+        "column": 2
+      },
+      "end": {
+        "line": 44,
+        "column": 13
+      }
+    },
+    "nav-row": {
+      "start": {
+        "line": 51,
+        "column": 2
+      },
+      "end": {
+        "line": 51,
+        "column": 10
+      }
+    },
+    "nav-button": {
+      "start": {
+        "line": 59,
+        "column": 2
+      },
+      "end": {
+        "line": 59,
+        "column": 13
+      }
+    },
+    "era-row": {
+      "start": {
+        "line": 75,
+        "column": 2
+      },
+      "end": {
+        "line": 75,
+        "column": 10
+      }
+    },
+    "era-button": {
+      "start": {
+        "line": 84,
+        "column": 2
+      },
+      "end": {
+        "line": 84,
+        "column": 13
+      }
+    },
+    "era-button-active": {
+      "start": {
+        "line": 99,
+        "column": 2
+      },
+      "end": {
+        "line": 99,
+        "column": 20
+      }
+    },
+    "divider-thin": {
+      "start": {
+        "line": 115,
+        "column": 2
+      },
+      "end": {
+        "line": 115,
+        "column": 15
+      }
+    },
+    "location": {
+      "start": {
+        "line": 137,
+        "column": 2
+      },
+      "end": {
+        "line": 137,
+        "column": 11
+      }
+    },
+    "__id__xr-button": {
+      "start": {
+        "line": 123,
+        "column": 2
+      },
+      "end": {
+        "line": 123,
+        "column": 12
+      }
+    },
+    "uid-1": {
+      "start": {
+        "line": 144,
+        "column": 0
+      },
+      "end": {
+        "line": 166,
+        "column": 6
+      }
+    },
+    "uid-2": {
+      "start": {
+        "line": 145,
+        "column": 2
+      },
+      "end": {
+        "line": 145,
+        "column": 41
+      }
+    },
+    "uid-3": {
+      "start": {
+        "line": 146,
+        "column": 2
+      },
+      "end": {
+        "line": 146,
+        "column": 60
+      }
+    },
+    "uid-4": {
+      "start": {
+        "line": 147,
+        "column": 2
+      },
+      "end": {
+        "line": 147,
+        "column": 29
+      }
+    },
+    "uid-5": {
+      "start": {
+        "line": 149,
+        "column": 2
+      },
+      "end": {
+        "line": 149,
+        "column": 55
+      }
+    },
+    "uid-6": {
+      "start": {
+        "line": 150,
+        "column": 2
+      },
+      "end": {
+        "line": 150,
+        "column": 54
+      }
+    },
+    "uid-7": {
+      "start": {
+        "line": 152,
+        "column": 2
+      },
+      "end": {
+        "line": 155,
+        "column": 8
+      }
+    },
+    "uid-8": {
+      "start": {
+        "line": 153,
+        "column": 4
+      },
+      "end": {
+        "line": 153,
+        "column": 70
+      }
+    },
+    "uid-9": {
+      "start": {
+        "line": 154,
+        "column": 4
+      },
+      "end": {
+        "line": 154,
+        "column": 72
+      }
+    },
+    "uid-10": {
+      "start": {
+        "line": 157,
+        "column": 2
+      },
+      "end": {
+        "line": 161,
+        "column": 8
+      }
+    },
+    "uid-11": {
+      "start": {
+        "line": 158,
+        "column": 4
+      },
+      "end": {
+        "line": 158,
+        "column": 59
+      }
+    },
+    "uid-12": {
+      "start": {
+        "line": 159,
+        "column": 4
+      },
+      "end": {
+        "line": 159,
+        "column": 71
+      }
+    },
+    "uid-13": {
+      "start": {
+        "line": 160,
+        "column": 4
+      },
+      "end": {
+        "line": 160,
+        "column": 62
+      }
+    },
+    "uid-14": {
+      "start": {
+        "line": 163,
+        "column": 2
+      },
+      "end": {
+        "line": 163,
+        "column": 34
+      }
+    },
+    "uid-15": {
+      "start": {
+        "line": 164,
+        "column": 2
+      },
+      "end": {
+        "line": 164,
+        "column": 42
+      }
+    },
+    "uid-16": {
+      "start": {
+        "line": 165,
+        "column": 2
+      },
+      "end": {
+        "line": 165,
+        "column": 47
+      }
+    }
+  }
+}

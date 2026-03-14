@@ -1,0 +1,167 @@
+<style>
+  .panel-container {
+    align-items: center;
+    padding: 3;
+    width: 50;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(8, 8, 20, 0.92);
+    border-color: #7b2ff2;
+    border-width: 0.2;
+    border-radius: 2;
+  }
+
+  .title {
+    font-size: 3;
+    color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 0.15;
+  }
+
+  .subtitle {
+    font-size: 1.6;
+    color: #a0a0b0;
+    text-align: center;
+    margin-top: 0.3;
+  }
+
+  .divider {
+    width: 90%;
+    height: 0.08;
+    margin-top: 1.5;
+    margin-bottom: 1.5;
+    background-color: #333355;
+  }
+
+  .era-label {
+    font-size: 4;
+    color: #ffffff;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 0.5;
+  }
+
+  .year-label {
+    font-size: 2;
+    color: #c4b5fd;
+    text-align: center;
+    margin-bottom: 1.5;
+  }
+
+  .nav-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    gap: 1.5;
+  }
+
+  .nav-button {
+    padding-top: 1.2;
+    padding-bottom: 1.2;
+    padding-left: 3;
+    padding-right: 3;
+    background-color: #1a1a2e;
+    border-color: #7b2ff2;
+    border-width: 0.15;
+    border-radius: 1.2;
+    color: #ffffff;
+    font-size: 2.2;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .era-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    gap: 1;
+    margin-top: 1.5;
+  }
+
+  .era-button {
+    padding-top: 1;
+    padding-bottom: 1;
+    padding-left: 2;
+    padding-right: 2;
+    background-color: #1a1a2e;
+    border-color: #444466;
+    border-width: 0.12;
+    border-radius: 1;
+    color: #a0a0b0;
+    font-size: 1.6;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .era-button-active {
+    padding-top: 1;
+    padding-bottom: 1;
+    padding-left: 2;
+    padding-right: 2;
+    background-color: #7b2ff2;
+    border-color: #9b5ff8;
+    border-width: 0.12;
+    border-radius: 1;
+    color: #ffffff;
+    font-size: 1.6;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .divider-thin {
+    width: 80%;
+    height: 0.06;
+    margin-top: 1.5;
+    margin-bottom: 1;
+    background-color: #222244;
+  }
+
+  #xr-button {
+    width: 100%;
+    padding: 1.2;
+    margin-top: 1;
+    background-color: #fbbf24;
+    color: #0d0221;
+    border-radius: 1.2;
+    border-width: 0;
+    font-size: 2;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .location {
+    font-size: 1.3;
+    color: #666680;
+    text-align: center;
+    margin-top: 0.5;
+  }
+</style>
+<div class="panel-container">
+  <span class="title">TIME MACHINE</span>
+  <span class="subtitle">San Francisco Ferry Building</span>
+  <div class="divider"></div>
+
+  <span id="era-label" class="era-label">Present</span>
+  <span id="year-label" class="year-label">2025</span>
+
+  <div class="nav-row">
+    <button id="prev-button" class="nav-button">&lt;&lt; Past</button>
+    <button id="next-button" class="nav-button">Future &gt;&gt;</button>
+  </div>
+
+  <div class="era-row">
+    <button id="era-past" class="era-button">1920s</button>
+    <button id="era-present" class="era-button-active">Present</button>
+    <button id="era-future" class="era-button">Future</button>
+  </div>
+
+  <div class="divider-thin"></div>
+  <button id="xr-button">Enter XR</button>
+  <span class="location">Embarcadero, SF</span>
+</div>
