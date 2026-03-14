@@ -100,13 +100,44 @@ The dev server is already configured to use `.key.pem` and `.cert.pem` from the 
 
 ## Pico Headset Testing
 
-1. Make sure your Pico and Mac are on the **same WiFi network**
-2. Generate HTTPS certs (see [HTTPS Setup](#https-setup) above)
-3. Run `npm run dev` — note the Network URL (e.g. `https://10.x.x.x:8081/`)
-4. Put on the headset, open the **Pico Browser** app
-5. Type the Network URL in the address bar
-6. Accept the certificate warning (Advanced > Proceed)
-7. Tap **Enter XR** to launch immersive mode
+### Option A — ngrok (recommended, easiest)
+
+No same-WiFi requirement, no certificate warnings. Uses [ngrok](https://ngrok.com/) to create a public HTTPS tunnel to your local dev server.
+
+```bash
+# Install ngrok
+brew install ngrok
+
+# Add your auth token (get it from https://dashboard.ngrok.com/get-started/your-authtoken)
+ngrok config add-authtoken YOUR_NGROK_AUTH_TOKEN
+
+# Start the dev server
+npm run dev
+
+# In a second terminal, start the tunnel
+ngrok http https://localhost:8081
+```
+
+ngrok will print a public URL like `https://something.ngrok-free.dev`. On your Pico:
+
+1. Put on the headset
+2. Open the **Pico Browser** (in App Library > All Apps)
+3. Type the ngrok URL in the address bar
+4. Tap **Enter XR** to launch immersive mode
+
+### Option B — Local network (direct IP)
+
+Requires both devices on the same WiFi. Requires HTTPS certs (see [HTTPS Setup](#https-setup) above).
+
+1. Run `npm run dev` — note the Network URL (e.g. `https://10.x.x.x:8081/`)
+2. Put on the headset, open the **Pico Browser**
+3. Type the Network URL in the address bar
+4. Accept the certificate warning (Advanced > Proceed)
+5. Tap **Enter XR** to launch immersive mode
+
+### Option C — HMD.link
+
+You can also add the ngrok or local URL to [HMD.link](https://hmd.link/) for easy access from the headset without typing long URLs.
 
 ## Controls
 
