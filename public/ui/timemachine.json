@@ -66,11 +66,11 @@
             "sourceTag": "button",
             "type": "custom",
             "children": [
-              "<< Past"
+              "Travel to the 1920s"
             ],
             "properties": {
-              "id": "prev-button",
-              "class": "nav-button"
+              "id": "btn-past",
+              "class": "nav-button-past"
             },
             "dataUid": "uid-8"
           },
@@ -78,13 +78,25 @@
             "sourceTag": "button",
             "type": "custom",
             "children": [
-              "Future >>"
+              "Return to Present"
             ],
             "properties": {
-              "id": "next-button",
+              "id": "btn-present",
               "class": "nav-button"
             },
             "dataUid": "uid-9"
+          },
+          {
+            "sourceTag": "button",
+            "type": "custom",
+            "children": [
+              "Travel to the Future"
+            ],
+            "properties": {
+              "id": "btn-future",
+              "class": "nav-button-future"
+            },
+            "dataUid": "uid-10"
           }
         ],
         "properties": {
@@ -95,57 +107,11 @@
       {
         "type": "container",
         "sourceTag": "div",
-        "children": [
-          {
-            "sourceTag": "button",
-            "type": "custom",
-            "children": [
-              "1920s"
-            ],
-            "properties": {
-              "id": "era-past",
-              "class": "era-button"
-            },
-            "dataUid": "uid-11"
-          },
-          {
-            "sourceTag": "button",
-            "type": "custom",
-            "children": [
-              "Present"
-            ],
-            "properties": {
-              "id": "era-present",
-              "class": "era-button-active"
-            },
-            "dataUid": "uid-12"
-          },
-          {
-            "sourceTag": "button",
-            "type": "custom",
-            "children": [
-              "Future"
-            ],
-            "properties": {
-              "id": "era-future",
-              "class": "era-button"
-            },
-            "dataUid": "uid-13"
-          }
-        ],
-        "properties": {
-          "class": "era-row"
-        },
-        "dataUid": "uid-10"
-      },
-      {
-        "type": "container",
-        "sourceTag": "div",
         "children": [],
         "properties": {
           "class": "divider-thin"
         },
-        "dataUid": "uid-14"
+        "dataUid": "uid-11"
       },
       {
         "sourceTag": "button",
@@ -156,7 +122,7 @@
         "properties": {
           "id": "xr-button"
         },
-        "dataUid": "uid-15"
+        "dataUid": "uid-12"
       },
       {
         "sourceTag": "span",
@@ -167,7 +133,7 @@
         "properties": {
           "class": "location"
         },
-        "dataUid": "uid-16"
+        "dataUid": "uid-13"
       }
     ],
     "properties": {
@@ -235,14 +201,15 @@
     "nav-row": {
       "content": {
         "display": "flex",
-        "flexDirection": "row",
+        "flexDirection": "column",
         "width": "100%",
-        "justifyContent": "center",
-        "gap": "1.5"
+        "alignItems": "center",
+        "gap": "1"
       }
     },
     "nav-button": {
       "content": {
+        "width": "90%",
         "paddingTop": "1.2",
         "paddingBottom": "1.2",
         "paddingLeft": "3",
@@ -252,50 +219,43 @@
         "borderWidth": "0.15",
         "borderRadius": 1.2,
         "color": "#ffffff",
-        "fontSize": "2.2",
+        "fontSize": "2",
         "fontWeight": "bold",
         "textAlign": "center",
         "cursor": "pointer"
       }
     },
-    "era-row": {
+    "nav-button-past": {
       "content": {
-        "display": "flex",
-        "flexDirection": "row",
-        "width": "100%",
-        "justifyContent": "center",
-        "gap": "1",
-        "marginTop": "1.5"
-      }
-    },
-    "era-button": {
-      "content": {
-        "paddingTop": "1",
-        "paddingBottom": "1",
-        "paddingLeft": "2",
-        "paddingRight": "2",
-        "backgroundColor": "#1a1a2e",
-        "borderColor": "#444466",
-        "borderWidth": "0.12",
-        "borderRadius": 1,
-        "color": "#a0a0b0",
-        "fontSize": "1.6",
+        "width": "90%",
+        "paddingTop": "1.2",
+        "paddingBottom": "1.2",
+        "paddingLeft": "3",
+        "paddingRight": "3",
+        "backgroundColor": "#2a1a0e",
+        "borderColor": "#d4a574",
+        "borderWidth": "0.15",
+        "borderRadius": 1.2,
+        "color": "#d4a574",
+        "fontSize": "2",
+        "fontWeight": "bold",
         "textAlign": "center",
         "cursor": "pointer"
       }
     },
-    "era-button-active": {
+    "nav-button-future": {
       "content": {
-        "paddingTop": "1",
-        "paddingBottom": "1",
-        "paddingLeft": "2",
-        "paddingRight": "2",
-        "backgroundColor": "#7b2ff2",
+        "width": "90%",
+        "paddingTop": "1.2",
+        "paddingBottom": "1.2",
+        "paddingLeft": "3",
+        "paddingRight": "3",
+        "backgroundColor": "#1a0e2e",
         "borderColor": "#9b5ff8",
-        "borderWidth": "0.12",
-        "borderRadius": 1,
-        "color": "#ffffff",
-        "fontSize": "1.6",
+        "borderWidth": "0.15",
+        "borderRadius": 1.2,
+        "color": "#9b5ff8",
+        "fontSize": "2",
         "fontWeight": "bold",
         "textAlign": "center",
         "cursor": "pointer"
@@ -415,223 +375,183 @@
         "column": 13
       }
     },
-    "era-row": {
+    "nav-button-past": {
       "start": {
-        "line": 75,
+        "line": 76,
         "column": 2
       },
       "end": {
-        "line": 75,
-        "column": 10
+        "line": 76,
+        "column": 18
       }
     },
-    "era-button": {
+    "nav-button-future": {
       "start": {
-        "line": 84,
+        "line": 93,
         "column": 2
       },
       "end": {
-        "line": 84,
-        "column": 13
-      }
-    },
-    "era-button-active": {
-      "start": {
-        "line": 99,
-        "column": 2
-      },
-      "end": {
-        "line": 99,
+        "line": 93,
         "column": 20
       }
     },
     "divider-thin": {
       "start": {
-        "line": 115,
+        "line": 110,
         "column": 2
       },
       "end": {
-        "line": 115,
+        "line": 110,
         "column": 15
       }
     },
     "location": {
       "start": {
-        "line": 137,
+        "line": 132,
         "column": 2
       },
       "end": {
-        "line": 137,
+        "line": 132,
         "column": 11
       }
     },
     "__id__xr-button": {
       "start": {
-        "line": 123,
+        "line": 118,
         "column": 2
       },
       "end": {
-        "line": 123,
+        "line": 118,
         "column": 12
       }
     },
     "uid-1": {
       "start": {
-        "line": 144,
+        "line": 139,
         "column": 0
       },
       "end": {
-        "line": 166,
+        "line": 156,
         "column": 6
       }
     },
     "uid-2": {
       "start": {
-        "line": 145,
+        "line": 140,
         "column": 2
       },
       "end": {
-        "line": 145,
+        "line": 140,
         "column": 41
       }
     },
     "uid-3": {
       "start": {
-        "line": 146,
+        "line": 141,
         "column": 2
       },
       "end": {
-        "line": 146,
+        "line": 141,
         "column": 60
       }
     },
     "uid-4": {
       "start": {
-        "line": 147,
+        "line": 142,
         "column": 2
       },
       "end": {
-        "line": 147,
+        "line": 142,
         "column": 29
       }
     },
     "uid-5": {
       "start": {
-        "line": 149,
+        "line": 144,
         "column": 2
       },
       "end": {
-        "line": 149,
+        "line": 144,
         "column": 55
       }
     },
     "uid-6": {
       "start": {
-        "line": 150,
+        "line": 145,
         "column": 2
       },
       "end": {
-        "line": 150,
+        "line": 145,
         "column": 54
       }
     },
     "uid-7": {
       "start": {
-        "line": 152,
+        "line": 147,
         "column": 2
       },
       "end": {
-        "line": 155,
+        "line": 151,
         "column": 8
       }
     },
     "uid-8": {
       "start": {
-        "line": 153,
+        "line": 148,
         "column": 4
       },
       "end": {
-        "line": 153,
-        "column": 70
+        "line": 148,
+        "column": 78
       }
     },
     "uid-9": {
       "start": {
-        "line": 154,
+        "line": 149,
         "column": 4
       },
       "end": {
-        "line": 154,
-        "column": 72
+        "line": 149,
+        "column": 74
       }
     },
     "uid-10": {
       "start": {
-        "line": 157,
-        "column": 2
+        "line": 150,
+        "column": 4
       },
       "end": {
-        "line": 161,
-        "column": 8
+        "line": 150,
+        "column": 83
       }
     },
     "uid-11": {
       "start": {
-        "line": 158,
-        "column": 4
+        "line": 153,
+        "column": 2
       },
       "end": {
-        "line": 158,
-        "column": 59
+        "line": 153,
+        "column": 34
       }
     },
     "uid-12": {
       "start": {
-        "line": 159,
-        "column": 4
+        "line": 154,
+        "column": 2
       },
       "end": {
-        "line": 159,
-        "column": 71
+        "line": 154,
+        "column": 42
       }
     },
     "uid-13": {
       "start": {
-        "line": 160,
-        "column": 4
-      },
-      "end": {
-        "line": 160,
-        "column": 62
-      }
-    },
-    "uid-14": {
-      "start": {
-        "line": 163,
+        "line": 155,
         "column": 2
       },
       "end": {
-        "line": 163,
-        "column": 34
-      }
-    },
-    "uid-15": {
-      "start": {
-        "line": 164,
-        "column": 2
-      },
-      "end": {
-        "line": 164,
-        "column": 42
-      }
-    },
-    "uid-16": {
-      "start": {
-        "line": 165,
-        "column": 2
-      },
-      "end": {
-        "line": 165,
+        "line": 155,
         "column": 47
       }
     }

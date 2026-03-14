@@ -1,6 +1,6 @@
 /**
  * TimeMachineSystem — manages switching between past / present / future
- * Gaussian splat worlds with animated transitions.
+ * Gaussian splat worlds with wormhole video transitions.
  */
 
 import { createSystem, Entity } from "@iwsdk/core";
@@ -9,6 +9,7 @@ import {
   GaussianSplatLoaderSystem,
 } from "./gaussianSplatLoader.js";
 import { Era, ERA_ORDER, WORLDS } from "./worlds.js";
+import { WormholeTransition } from "./wormholeTransition.js";
 
 export class TimeMachineSystem extends createSystem({
   splats: { required: [GaussianSplatLoader] },
@@ -17,13 +18,23 @@ export class TimeMachineSystem extends createSystem({
   private splatEntity: Entity | null = null;
   private switching = false;
   private onEraChange: ((era: Era) => void) | null = null;
+  private wormhole: WormholeTransition | null = null;
 
   init() {
+    this.wormhole = new WormholeTransition(this.world.scene);
+
     this.queries.splats.subscribe("qualify", (entity) => {
       if (!this.splatEntity) {
         this.splatEntity = entity;
       }
     });
+  }
+
+  update() {
+    // Drive the wormhole animation every frame
+    if (this.wormhole?.isActive()) {
+      this.wormhole.tick(this.world.camera);
+    }
   }
 
   getEra(): Era {
@@ -42,25 +53,36 @@ export class TimeMachineSystem extends createSystem({
     const world = WORLDS[era];
     const splatSystem = this.world.getSystem(GaussianSplatLoaderSystem)!;
 
+    // Update UI immediately
+    this.onEraChange?.(era);
+
     try {
-      // Animate out current splat
-      await splatSystem.unload(this.splatEntity, { animate: true });
+      // 1. Start wormhole video (fades in over the current scene)
+      await this.wormhole!.play();
 
-      // Update component URLs
+      // 2. Now fully covered — unload old splat (no animation needed)
+      await splatSystem.unload(this.splatEntity, { animate: false });
+
+      // 3. Update component URLs
       this.splatEntity.setValue(GaussianSplatLoader, "splatUrl", world.splatUrl);
-      this.splatEntity.setValue(
-        GaussianSplatLoader,
-        "meshUrl",
-        world.meshUrl,
-      );
+      this.splatEntity.setValue(GaussianSplatLoader, "meshUrl", world.meshUrl);
 
-      // Load new splat with animation
-      await splatSystem.load(this.splatEntity, { animate: true });
+      // 4. Load new splat while wormhole video plays
+      await splatSystem.load(this.splatEntity, { animate: false });
+
+      // 5. Splat is ready — tell wormhole it can fade out
+      //    (waits for video to finish if still playing)
+      this.wormhole!.signalSplatReady();
+      await this.wormhole!.waitForComplete();
 
       this.currentEra = era;
-      this.onEraChange?.(era);
+      console.log(`[TimeMachine] Switched to ${era}`);
     } catch (err) {
       console.error(`[TimeMachine] Failed to switch to ${era}:`, err);
+      // Revert UI on failure
+      this.onEraChange?.(this.currentEra);
+      // Force-end transition so user isn't stuck
+      this.wormhole!.signalSplatReady();
     } finally {
       this.switching = false;
     }

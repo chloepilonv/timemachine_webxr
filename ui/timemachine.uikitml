@@ -51,13 +51,14 @@
 
   .nav-row {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
-    justify-content: center;
-    gap: 1.5;
+    align-items: center;
+    gap: 1;
   }
 
   .nav-button {
+    width: 90%;
     padding-top: 1.2;
     padding-bottom: 1.2;
     padding-left: 3;
@@ -67,47 +68,41 @@
     border-width: 0.15;
     border-radius: 1.2;
     color: #ffffff;
-    font-size: 2.2;
+    font-size: 2;
     font-weight: bold;
     text-align: center;
     cursor: pointer;
   }
 
-  .era-row {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    justify-content: center;
-    gap: 1;
-    margin-top: 1.5;
-  }
-
-  .era-button {
-    padding-top: 1;
-    padding-bottom: 1;
-    padding-left: 2;
-    padding-right: 2;
-    background-color: #1a1a2e;
-    border-color: #444466;
-    border-width: 0.12;
-    border-radius: 1;
-    color: #a0a0b0;
-    font-size: 1.6;
+  .nav-button-past {
+    width: 90%;
+    padding-top: 1.2;
+    padding-bottom: 1.2;
+    padding-left: 3;
+    padding-right: 3;
+    background-color: #2a1a0e;
+    border-color: #d4a574;
+    border-width: 0.15;
+    border-radius: 1.2;
+    color: #d4a574;
+    font-size: 2;
+    font-weight: bold;
     text-align: center;
     cursor: pointer;
   }
 
-  .era-button-active {
-    padding-top: 1;
-    padding-bottom: 1;
-    padding-left: 2;
-    padding-right: 2;
-    background-color: #7b2ff2;
+  .nav-button-future {
+    width: 90%;
+    padding-top: 1.2;
+    padding-bottom: 1.2;
+    padding-left: 3;
+    padding-right: 3;
+    background-color: #1a0e2e;
     border-color: #9b5ff8;
-    border-width: 0.12;
-    border-radius: 1;
-    color: #ffffff;
-    font-size: 1.6;
+    border-width: 0.15;
+    border-radius: 1.2;
+    color: #9b5ff8;
+    font-size: 2;
     font-weight: bold;
     text-align: center;
     cursor: pointer;
@@ -151,14 +146,9 @@
   <span id="year-label" class="year-label">2025</span>
 
   <div class="nav-row">
-    <button id="prev-button" class="nav-button">&lt;&lt; Past</button>
-    <button id="next-button" class="nav-button">Future &gt;&gt;</button>
-  </div>
-
-  <div class="era-row">
-    <button id="era-past" class="era-button">1920s</button>
-    <button id="era-present" class="era-button-active">Present</button>
-    <button id="era-future" class="era-button">Future</button>
+    <button id="btn-past" class="nav-button-past">Travel to the 1920s</button>
+    <button id="btn-present" class="nav-button">Return to Present</button>
+    <button id="btn-future" class="nav-button-future">Travel to the Future</button>
   </div>
 
   <div class="divider-thin"></div>

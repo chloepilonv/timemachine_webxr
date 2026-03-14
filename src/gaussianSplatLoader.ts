@@ -9,7 +9,7 @@ import { GaussianSplatAnimator } from "./gaussianSplatAnimator.js";
 // ------------------------------------------------------------
 // Constants & Types
 // ------------------------------------------------------------
-const LOAD_TIMEOUT_MS = 30_000;
+const LOAD_TIMEOUT_MS = 120_000;
 
 interface SplatInstance {
   splat: SplatMesh;
@@ -61,13 +61,19 @@ export class GaussianSplatLoaderSystem extends createSystem({
   // Initialization
   // ----------------------------------------------------------
   init() {
+    const isMobile = /Android|Pico|Quest|OculusBrowser/i.test(
+      navigator.userAgent,
+    );
     const spark = new SparkRenderer({
       renderer: this.world.renderer,
       enableLod: true,
-      lodSplatScale: 2.0,
-      behindFoveate: 1.0,
+      lodSplatScale: isMobile ? 0.8 : 2.0,
+      behindFoveate: isMobile ? 0.1 : 1.0,
     });
-    spark.outsideFoveate = 1.0;
+    spark.outsideFoveate = isMobile ? 0.2 : 1.0;
+    console.log(
+      `[SparkRenderer] mode=${isMobile ? "mobile" : "desktop"} lodSplatScale=${spark.lodSplatScale}`,
+    );
     spark.renderOrder = -10;
     this.world.scene.add(spark);
     this.sparkRenderer = spark;

@@ -127,66 +127,29 @@ export class PanelSystem extends createSystem({
         // --- Era labels ---
         const eraLabel = document.getElementById("era-label") as UIKit.Text;
         const yearLabel = document.getElementById("year-label") as UIKit.Text;
-        const eraPast = document.getElementById("era-past") as UIKit.Text;
-        const eraPresent = document.getElementById(
-          "era-present",
-        ) as UIKit.Text;
-        const eraFuture = document.getElementById("era-future") as UIKit.Text;
 
-        const eraButtons: Record<Era, UIKit.Text> = {
-          past: eraPast,
-          present: eraPresent,
-          future: eraFuture,
-        };
+        // --- Travel buttons ---
+        const btnPast = document.getElementById("btn-past") as UIKit.Text;
+        const btnPresent = document.getElementById("btn-present") as UIKit.Text;
+        const btnFuture = document.getElementById("btn-future") as UIKit.Text;
 
         const updateUI = (era: Era) => {
           const w = WORLDS[era];
           eraLabel.setProperties({ text: w.label });
           yearLabel.setProperties({ text: w.year });
-
-          // Update active state styling
-          for (const [key, btn] of Object.entries(eraButtons)) {
-            btn.setProperties({
-              style: {
-                backgroundColor:
-                  key === era ? "#7b2ff2" : "#1a1a2e",
-                borderColor:
-                  key === era ? "#9b5ff8" : "#444466",
-                color: key === era ? "#ffffff" : "#a0a0b0",
-                fontWeight: key === era ? "bold" : "normal",
-              },
-            });
-          }
         };
 
         timeMachine.setEraChangeCallback(updateUI);
 
-        // --- Navigation buttons ---
-        const prevButton = document.getElementById(
-          "prev-button",
-        ) as UIKit.Text;
-        const nextButton = document.getElementById(
-          "next-button",
-        ) as UIKit.Text;
-
-        prevButton.addEventListener("click", () => {
-          timeMachine.prev();
-        });
-
-        nextButton.addEventListener("click", () => {
-          timeMachine.next();
-        });
-
-        // --- Direct era buttons ---
-        eraPast.addEventListener("click", () => {
+        btnPast.addEventListener("click", () => {
           timeMachine.switchTo("past");
         });
 
-        eraPresent.addEventListener("click", () => {
+        btnPresent.addEventListener("click", () => {
           timeMachine.switchTo("present");
         });
 
-        eraFuture.addEventListener("click", () => {
+        btnFuture.addEventListener("click", () => {
           timeMachine.switchTo("future");
         });
       },
