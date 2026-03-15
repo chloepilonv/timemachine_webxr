@@ -51,12 +51,14 @@ enterBtn.addEventListener("click", async () => {
   enterBtn.textContent = "LOADING...";
   enterBtn.style.pointerEvents = "none";
   await worldReady;
-  menu.classList.add("hidden");
+  // Smooth fade out then remove
+  menu.classList.add("fade-out");
   if (dismissWelcome) dismissWelcome();
   if (!audioStarted) {
     audioStarted = true;
     (window as any).__audioManager?.start("present");
   }
+  setTimeout(() => menu.classList.add("hidden"), 1500);
 });
 
 const handleTalkToggle = (btn: HTMLElement) => {
@@ -293,6 +295,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       welcomePanel.hide();
       if (temporalConsole) temporalConsole.show();
       talkBtnPersistent.classList.add("visible");
+      timeMachine.enableInput();
     };
 
     if (renderer) {
@@ -328,7 +331,38 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
                     audioStarted = true;
                     audioManager.start("present");
                   }
+                  // Enable era button input after a short delay
+                  // so the A press doesn't also trigger next era
+                  setTimeout(() => timeMachine.enableInput(), 500);
                   break;
+                }
+              }
+            }
+          }
+        }
+        // X-button toggle talk (left controller, button 4)
+        if (welcomeDismissed && renderer.xr.isPresenting) {
+          const session = renderer.xr.getSession();
+          if (session) {
+            for (const source of session.inputSources) {
+              if (source.handedness === "left" && source.gamepad) {
+                const xBtn = source.gamepad.buttons[4];
+                if (xBtn && xBtn.pressed && !(window as any).__xPressed) {
+                  (window as any).__xPressed = true;
+                  import("./convaiAgent.js")
+                    .then(({ convaiAgent }) => {
+                      if (convaiAgent.isTalking) {
+                        convaiAgent.stopInteraction();
+                        console.log("[XR] X button — stop talking");
+                      } else {
+                        convaiAgent.startInteraction();
+                        console.log("[XR] X button — start talking");
+                      }
+                    })
+                    .catch(() => {});
+                }
+                if (xBtn && !xBtn.pressed) {
+                  (window as any).__xPressed = false;
                 }
               }
             }

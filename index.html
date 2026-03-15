@@ -35,7 +35,16 @@
                     radial-gradient(ellipse at 50% 50%, #0d0d2b 0%, #000008 100%);
       }
 
+      #main-menu.fade-out {
+        animation: menuFadeOut 1.5s ease-in-out forwards;
+      }
       #main-menu.hidden { display: none; }
+
+      @keyframes menuFadeOut {
+        0%   { opacity: 1; }
+        40%  { opacity: 0; background: radial-gradient(ellipse at 50% 50%, #ffffff 0%, #c8b8ff 100%); }
+        100% { opacity: 0; }
+      }
 
       /* Twinkling stars layer */
       #main-menu::before,
@@ -200,7 +209,7 @@
         <div id="loading-bar"></div>
       </div>
       <button id="enter-btn" class="menu-btn" disabled>Loading...</button>
-      <button id="menu-talk-btn" class="menu-btn">Start Talking to Agent</button>
+      <button id="menu-talk-btn" class="menu-btn" style="display:none">Start Talking to Agent</button>
     </div>
 
     <!-- Persistent talk button — stays visible after menu dismissal (desktop only) -->

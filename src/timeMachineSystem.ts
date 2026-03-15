@@ -41,6 +41,7 @@ export class TimeMachineSystem extends createSystem({
   private eraChangeListeners: ((era: Era) => void)[] = [];
   private wormhole: WormholeTransition | null = null;
   private audioManager: AudioManager | null = null;
+  private inputEnabled = false;
 
   /**
    * Resolved from the system's update() tick when the wormhole reaches
@@ -72,14 +73,14 @@ export class TimeMachineSystem extends createSystem({
     }
 
     // In XR: controller buttons to switch eras
-    if (this.world.visibilityState.value !== VisibilityState.NonImmersive) {
+    if (this.inputEnabled && this.world.visibilityState.value !== VisibilityState.NonImmersive) {
       const right = this.input?.gamepads?.right;
       const left = this.input?.gamepads?.left;
 
-      if (right?.getButtonDown("a-button") || left?.getButtonDown("x-button")) {
+      if (right?.getButtonDown("a-button")) {
         this.next().catch(() => {});
       }
-      if (right?.getButtonDown("b-button") || left?.getButtonDown("y-button")) {
+      if (right?.getButtonDown("b-button")) {
         this.prev().catch(() => {});
       }
     }
@@ -95,6 +96,10 @@ export class TimeMachineSystem extends createSystem({
 
   setAudioManager(audio: AudioManager) {
     this.audioManager = audio;
+  }
+
+  enableInput() {
+    this.inputEnabled = true;
   }
 
   async switchTo(era: Era): Promise<void> {

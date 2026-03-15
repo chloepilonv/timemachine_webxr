@@ -154,11 +154,28 @@ You can also add the ngrok or local URL to [HMD.link](https://hmd.link/) for eas
 
 ## Controls
 
-- **<< Past / Future >>** — cycle through eras
-- **1920s / Present / Future** — jump directly to an era
-- **Enter XR** — launch immersive VR mode
-- **Teleport** — point and click to move (locomotion via invisible floor plane)
-- **Grab** — grab and move objects with controllers or hand tracking
+### Landing Menu (Desktop)
+- **Enter the Time Machine** — loads into the present world with a smooth fade
+- **Talk to Agent** — floating button (bottom-right) toggles voice conversation
+
+### VR Controls (Quest 3 / Pico)
+
+| Button | Action |
+|--------|--------|
+| **A** (right) | Next era (present → future → past) |
+| **B** (right) | Previous era |
+| **X** (left) | Toggle talk to AI agent (tap to start, tap to stop) |
+| **Grip/Squeeze** (either) | Push-to-talk (hold to speak, release to stop) |
+| **Trigger** | Select / interact |
+| **Thumbstick** | Teleport locomotion |
+
+### Welcome Screen (VR)
+When entering VR, a 3D "TIME MACHINE" panel appears. Press **A** to enter the present world.
+
+### Era Navigation
+- **A** = travel to the next era (wormhole transition with white flash)
+- **B** = travel to the previous era
+- Each era has its own AI agent with period-specific knowledge
 
 ## Deployment
 
