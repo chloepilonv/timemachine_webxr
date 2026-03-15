@@ -11,13 +11,20 @@ export class ConvaiAgent {
 
   // Idle animation state
   private clock = new THREE.Clock(false);
+  private baseQuats: Map<string, THREE.Quaternion> = new Map();
   private bones: {
     hips: THREE.Bone | null;
     spine1: THREE.Bone | null;
     head: THREE.Bone | null;
     leftArm: THREE.Bone | null;
     rightArm: THREE.Bone | null;
-  } = { hips: null, spine1: null, head: null, leftArm: null, rightArm: null };
+    leftForeArm: THREE.Bone | null;
+    rightForeArm: THREE.Bone | null;
+    leftShoulder: THREE.Bone | null;
+    rightShoulder: THREE.Bone | null;
+    neck: THREE.Bone | null;
+    spine: THREE.Bone | null;
+  } = { hips: null, spine1: null, head: null, leftArm: null, rightArm: null, leftForeArm: null, rightForeArm: null, leftShoulder: null, rightShoulder: null, neck: null, spine: null };
 
   init() {
     if (this.client) return;
@@ -102,17 +109,41 @@ export class ConvaiAgent {
                 case "Head": this.bones.head = node; break;
                 case "LeftArm": this.bones.leftArm = node; break;
                 case "RightArm": this.bones.rightArm = node; break;
+                case "LeftForeArm": this.bones.leftForeArm = node; break;
+                case "RightForeArm": this.bones.rightForeArm = node; break;
+                case "LeftShoulder": this.bones.leftShoulder = node; break;
+                case "RightShoulder": this.bones.rightShoulder = node; break;
+                case "Neck": this.bones.neck = node; break;
+                case "Spine": this.bones.spine = node; break;
               }
             }
           });
 
-          // Take avatar out of T-pose: rotate arms down ~65°
-          const armAngle = THREE.MathUtils.degToRad(65);
-          if (this.bones.leftArm) {
-            this.bones.leftArm.rotation.z = armAngle;
+          // Take avatar out of T-pose into a natural standing pose
+          // Apply a downward rotation in world-space via quaternion multiply
+          const downRotL = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(60)
+          );
+          const downRotR = new THREE.Quaternion().setFromAxisAngle(
+            new THREE.Vector3(0, 0, 1), THREE.MathUtils.degToRad(-60)
+          );
+          if (this.bones.leftShoulder) {
+            this.bones.leftShoulder.quaternion.multiply(downRotL);
           }
-          if (this.bones.rightArm) {
-            this.bones.rightArm.rotation.z = -armAngle;
+          if (this.bones.rightShoulder) {
+            this.bones.rightShoulder.quaternion.multiply(downRotR);
+          }
+          // Slight bend in elbows so arms don't look rigid
+          if (this.bones.leftForeArm) {
+            this.bones.leftForeArm.rotation.y = THREE.MathUtils.degToRad(15);
+          }
+          if (this.bones.rightForeArm) {
+            this.bones.rightForeArm.rotation.y = THREE.MathUtils.degToRad(-15);
+          }
+
+          // Store base quaternions after posing — idle animation applies on top
+          for (const [name, bone] of Object.entries(this.bones)) {
+            if (bone) this.baseQuats.set(name, bone.quaternion.clone());
           }
 
           const foundBones = Object.entries(this.bones)
@@ -146,26 +177,73 @@ export class ConvaiAgent {
     });
   }
 
-  /** Call every frame with delta time (seconds) for idle animation. */
-  update(delta: number) {
-    if (!this.mesh) return;
+  /** Apply a small rotation delta on top of the stored base pose. */
+  private applyDelta(name: string, bone: THREE.Bone, x: number, y: number, z: number) {
+    const base = this.baseQuats.get(name);
+    if (!base) return;
+    const delta = new THREE.Quaternion().setFromEuler(new THREE.Euler(x, y, z));
+    bone.quaternion.copy(base).multiply(delta);
+  }
 
-    const elapsed = this.clock.getElapsedTime();
+  /** Call every frame for procedural idle animation. */
+  update(_delta: number) {
+    if (!this.mesh || this.baseQuats.size === 0) return;
 
-    // Breathing: gentle sine on Spine1 scale Y
+    const t = this.clock.getElapsedTime();
+
+    // Breathing: chest expansion on Spine1
     if (this.bones.spine1) {
-      this.bones.spine1.scale.y = 1.0 + Math.sin(elapsed * 1.5 * Math.PI * 2) * 0.02;
+      const breath = Math.sin(t * 2.5) * 0.5 + 0.5;
+      this.bones.spine1.scale.y = 1.0 + breath * 0.025;
+      this.applyDelta("spine1", this.bones.spine1, breath * 0.015, 0, 0);
     }
 
-    // Body sway: slow sine on Hips rotation Z
+    // Weight shift: slow sway on Hips
     if (this.bones.hips) {
-      this.bones.hips.rotation.z = Math.sin(elapsed * 0.5 * Math.PI * 2) * 0.02;
+      this.applyDelta("hips", this.bones.hips,
+        0,
+        Math.sin(t * 0.5) * 0.01,
+        Math.sin(t * 0.8) * 0.025 + Math.sin(t * 0.3) * 0.01
+      );
     }
 
-    // Head micro-movement: gentle wander on X and Y
+    // Spine follows hips subtly
+    if (this.bones.spine) {
+      this.applyDelta("spine", this.bones.spine, 0, 0, Math.sin(t * 0.8 + 0.5) * -0.01);
+    }
+
+    // Neck + Head: layered look-around
+    if (this.bones.neck) {
+      this.applyDelta("neck", this.bones.neck,
+        Math.sin(t * 0.6) * 0.02,
+        Math.sin(t * 0.35) * 0.015,
+        0
+      );
+    }
     if (this.bones.head) {
-      this.bones.head.rotation.x = Math.sin(elapsed * 0.7 * Math.PI * 2) * 0.01;
-      this.bones.head.rotation.y = Math.sin(elapsed * 0.4 * Math.PI * 2) * 0.01;
+      this.applyDelta("head", this.bones.head,
+        Math.sin(t * 1.1 + 1.0) * 0.025 + Math.sin(t * 0.3) * 0.01,
+        Math.sin(t * 0.45 + 2.0) * 0.03,
+        Math.sin(t * 0.7) * 0.008
+      );
+    }
+
+    // Shoulders: subtle rise/fall with breathing
+    const shoulderBreath = Math.sin(t * 2.5) * 0.01;
+    if (this.bones.leftShoulder) {
+      this.applyDelta("leftShoulder", this.bones.leftShoulder, 0, 0, shoulderBreath);
+    }
+    if (this.bones.rightShoulder) {
+      this.applyDelta("rightShoulder", this.bones.rightShoulder, 0, 0, -shoulderBreath);
+    }
+
+    // Arms: gentle swing
+    const armSwing = Math.sin(t * 0.8 + 1.0) * 0.015;
+    if (this.bones.leftArm) {
+      this.applyDelta("leftArm", this.bones.leftArm, armSwing, 0, 0);
+    }
+    if (this.bones.rightArm) {
+      this.applyDelta("rightArm", this.bones.rightArm, -armSwing, 0, 0);
     }
   }
 
