@@ -46,7 +46,10 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
   },
 })
   .then((world) => {
-    world.camera.position.set(0, 1.5, 0);
+    world.camera.position.set(0, 0.2, 0);
+
+    // Splat capture viewpoint height. See Y-POS.md.
+    const SPLAT_EYE_HEIGHT = 0.2;
 
     world.scene.background = new THREE.Color(0x000000);
     world.scene.add(new THREE.AmbientLight(0xffffff, 1.0));
@@ -89,9 +92,14 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 
     const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
 
-    // Play splat animation when entering XR
+    // In VR, local-floor puts eyes at ~1.6m but splat viewpoint is at
+    // SPLAT_EYE_HEIGHT. Lift the splat so its viewpoint matches user eyes.
+    const VR_SCENE_LIFT = 1.6 - SPLAT_EYE_HEIGHT; // ~1.4m
     world.visibilityState.subscribe((state) => {
-      if (state !== VisibilityState.NonImmersive) {
+      const inVR = state !== VisibilityState.NonImmersive;
+      splatEntity.object3D!.position.y = inVR ? VR_SCENE_LIFT : 0;
+
+      if (inVR) {
         splatSystem.replayAnimation(splatEntity).catch((err) => {
           console.error("[World] Failed to replay splat animation:", err);
         });
