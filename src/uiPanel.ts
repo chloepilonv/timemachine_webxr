@@ -143,6 +143,26 @@ export class PanelSystem extends createSystem({
           }
         });
 
+        // --- Convai Text Test Button (for debugging multi-turn) ---
+        const testTextButton = document.getElementById("test-text-button") as UIKit.Text;
+        let testMessageIndex = 0;
+        const testMessages = [
+          "Hello, who are you?",
+          "Tell me about this building's history.",
+          "What year was it built?",
+        ];
+        testTextButton.addEventListener("click", () => {
+          const msg = testMessages[testMessageIndex % testMessages.length];
+          testMessageIndex++;
+          convaiAgent.sendText(msg);
+          testTextButton.setProperties({
+            text: `Sent: "${msg.substring(0, 20)}..."`,
+          });
+          setTimeout(() => {
+            testTextButton.setProperties({ text: "Send Test Text" });
+          }, 3000);
+        });
+
         // --- Era labels ---
         const eraLabel = document.getElementById("era-label") as UIKit.Text;
         const yearLabel = document.getElementById("year-label") as UIKit.Text;

@@ -60,29 +60,29 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     });
 
     // ------------------------------------------------------------
-    // Gaussian Splat — starts with the present-day world
+    // Gaussian Splat — TEMPORARILY DISABLED for voice testing
     // ------------------------------------------------------------
-    const presentWorld = WORLDS.present;
-    const splatEntity = world.createTransformEntity();
-    splatEntity.addComponent(GaussianSplatLoader, {
-      splatUrl: presentWorld.splatUrl,
-      meshUrl: presentWorld.meshUrl,
-      autoLoad: true,
-      animate: false,
-      enableLod: true,
-      lodSplatScale: 1.0,
-    });
+    // const presentWorld = WORLDS.present;
+    // const splatEntity = world.createTransformEntity();
+    // splatEntity.addComponent(GaussianSplatLoader, {
+    //   splatUrl: presentWorld.splatUrl,
+    //   meshUrl: presentWorld.meshUrl,
+    //   autoLoad: true,
+    //   animate: false,
+    //   enableLod: true,
+    //   lodSplatScale: 1.0,
+    // });
 
-    const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
+    // const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
 
-    // Play splat animation when entering XR
-    world.visibilityState.subscribe((state) => {
-      if (state !== VisibilityState.NonImmersive) {
-        splatSystem.replayAnimation(splatEntity).catch((err) => {
-          console.error("[World] Failed to replay splat animation:", err);
-        });
-      }
-    });
+    // // Play splat animation when entering XR
+    // world.visibilityState.subscribe((state) => {
+    //   if (state !== VisibilityState.NonImmersive) {
+    //     splatSystem.replayAnimation(splatEntity).catch((err) => {
+    //       console.error("[World] Failed to replay splat animation:", err);
+    //     });
+    //   }
+    // });
 
 
     // ------------------------------------------------------------

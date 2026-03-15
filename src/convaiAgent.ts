@@ -7,6 +7,7 @@ export class ConvaiAgent {
   mesh: THREE.Object3D | null = null;
   isTalking: boolean = false;
   lastTranscript: string = "";
+  _cooldown: boolean = false;
 
   init() {
     if (this.client) return;
@@ -100,6 +101,10 @@ export class ConvaiAgent {
       console.error("[ConvaiAgent] Cannot start — client not initialized!");
       return;
     }
+    if (this._cooldown) {
+      console.warn("[ConvaiAgent] ⏳ Cooldown active — please wait a moment...");
+      return;
+    }
     console.log("[ConvaiAgent] 🎤 Start listening...");
     this.isTalking = true;
     this.client.startAudioChunk();
@@ -113,6 +118,25 @@ export class ConvaiAgent {
     console.log("[ConvaiAgent] ⏹️ Stop listening — sending audio to Convai...");
     this.isTalking = false;
     this.client.endAudioChunk();
+
+    // Cooldown: prevent immediate re-start so AudioRecorder can fully reset
+    this._cooldown = true;
+    setTimeout(() => {
+      this._cooldown = false;
+      console.log("[ConvaiAgent] ✅ Ready for next interaction.");
+    }, 1500);
+  }
+
+  // Text-based input for testing multi-turn without mic
+  sendText(text: string) {
+    if (!this.client) {
+      console.error("[ConvaiAgent] Cannot send text — client not initialized!");
+      return;
+    }
+    // Must stop any playing audio and close old gRPC connection first
+    this.client.stopCharacterAudio();
+    console.log("[ConvaiAgent] 📝 Sending text:", text);
+    this.client.sendTextChunk(text);
   }
 }
 
