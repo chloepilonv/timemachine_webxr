@@ -76,14 +76,27 @@ npm run dev
 
 Opens at `https://localhost:8081/`. The IWSDK headset simulator is injected automatically on localhost — use the virtual controllers to look around and interact.
 
+### Transition Video
+
+Download `wormhole.mp4` from the [Google Drive assets folder](https://drive.google.com/drive/u/0/folders/1I-vMTyBWYTMFmflAM35rkJLRSXnFFczE) and place it in `public/`:
+
+```bash
+# After downloading:
+cp ~/Downloads/Cosmic_Wormhole_Video_rcmtzMU3.mp4 public/wormhole.mp4
+```
+
+A cosmic wormhole video plays as a transition when switching between eras.
+
 ### Expected file structure
 
 ```
-public/splats/
-  present.spz            # ~29 MB
-  present-collider.glb   # ~3 MB (collision mesh for locomotion)
-  past.spz               # ~21 MB
-  future.spz             # ~21 MB
+public/
+  wormhole.mp4             # ~18 MB (transition video)
+  splats/
+    present.spz            # ~29 MB
+    present-collider.glb   # ~3 MB (collision mesh for locomotion)
+    past.spz               # ~21 MB
+    future.spz             # ~21 MB
 ```
 
 ### HTTPS Setup

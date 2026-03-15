@@ -144,3 +144,6 @@ public/splats/*.glb
 
 # Local HTTPS certs
 *.pem
+
+# Transition video (download from Google Drive)
+public/wormhole.mp4

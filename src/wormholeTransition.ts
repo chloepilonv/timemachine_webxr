@@ -7,7 +7,8 @@
 import * as THREE from "three";
 
 const VIDEO_PATH = "./wormhole.mp4";
-const FADE_DURATION = 0.5; // seconds for fade in/out
+const FADE_DURATION_MS = 300;
+const MIN_DISPLAY_MS = 1500; // minimum time to show the wormhole
 
 export class WormholeTransition {
   private video: HTMLVideoElement;
@@ -16,20 +17,22 @@ export class WormholeTransition {
   private material: THREE.ShaderMaterial;
   private scene: THREE.Scene;
   private active = false;
-  private fadingIn = false;
-  private fadingOut = false;
-  private fadeStart = 0;
-  private onComplete: (() => void) | null = null;
+  private opacity = 0;
+  private targetOpacity = 0;
+  private fadeStartTime = 0;
+  private fadeStartOpacity = 0;
+  private playStartTime = 0;
+  private resolveTransition: (() => void) | null = null;
   private splatReady = false;
+  private videoEnded = false;
 
   constructor(scene: THREE.Scene) {
     this.scene = scene;
 
-    // Video element (hidden, not added to DOM visually)
     this.video = document.createElement("video");
     this.video.src = VIDEO_PATH;
-    this.video.loop = false;
-    this.video.muted = true; // must be muted for autoplay
+    this.video.loop = true; // loop so it keeps playing if splat is slow
+    this.video.muted = true;
     this.video.playsInline = true;
     this.video.crossOrigin = "anonymous";
     this.video.preload = "auto";
@@ -37,7 +40,6 @@ export class WormholeTransition {
     this.texture = new THREE.VideoTexture(this.video);
     this.texture.colorSpace = THREE.SRGBColorSpace;
 
-    // Shader material with opacity for fade in/out
     this.material = new THREE.ShaderMaterial({
       uniforms: {
         map: { value: this.texture },
@@ -65,128 +67,141 @@ export class WormholeTransition {
       side: THREE.BackSide,
     });
 
-    // Sphere that follows the camera
-    const geometry = new THREE.SphereGeometry(5, 32, 32);
-    this.sphere = new THREE.Mesh(geometry, this.material);
-    this.sphere.renderOrder = 9999; // render on top of everything
-    this.sphere.visible = false;
+    // Cylinder wraps the video around you like a wormhole tunnel
+    // Open-ended so you see the video on the walls, with caps for top/bottom
+    const cylinder = new THREE.CylinderGeometry(3, 3, 20, 64, 1, true);
+    const capGeo = new THREE.CircleGeometry(3, 64);
 
-    // Listen for video end
-    this.video.addEventListener("ended", () => {
-      this.onVideoEnded();
+    this.sphere = new THREE.Group() as unknown as THREE.Mesh;
+
+    const wallMesh = new THREE.Mesh(cylinder, this.material);
+    (this.sphere as unknown as THREE.Group).add(wallMesh);
+
+    // Top and bottom caps (solid black to block outside)
+    const capMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.BackSide,
     });
+    const topCap = new THREE.Mesh(capGeo, capMat);
+    topCap.position.y = 10;
+    topCap.rotation.x = Math.PI / 2;
+    (this.sphere as unknown as THREE.Group).add(topCap);
+
+    const bottomCap = new THREE.Mesh(capGeo.clone(), capMat);
+    bottomCap.position.y = -10;
+    bottomCap.rotation.x = -Math.PI / 2;
+    (this.sphere as unknown as THREE.Group).add(bottomCap);
+
+    this.sphere.renderOrder = 9999;
+    wallMesh.renderOrder = 9999;
+    topCap.renderOrder = 9999;
+    bottomCap.renderOrder = 9999;
+    this.sphere.visible = false;
   }
 
   /**
-   * Play the wormhole transition. Returns a promise that resolves
-   * when you should load the new splat (after fade-in completes).
-   * Call `signalSplatReady()` when the new splat is loaded.
+   * Start the wormhole transition. Fades in the video sphere.
+   * Returns immediately — does not block.
    */
-  async play(): Promise<void> {
+  start(): void {
     if (this.active) return;
 
     this.active = true;
     this.splatReady = false;
+    this.videoEnded = false;
     this.sphere.visible = true;
     this.scene.add(this.sphere);
+    this.playStartTime = performance.now();
 
-    // Reset video
     this.video.currentTime = 0;
-    this.material.uniforms.opacity.value = 0.0;
-
-    // Fade in
-    this.fadingIn = true;
-    this.fadingOut = false;
-    this.fadeStart = performance.now();
-
-    try {
-      await this.video.play();
-    } catch (err) {
+    this.video.playbackRate = 2.0;
+    this.video.play().catch((err) => {
       console.warn("[Wormhole] Video play failed:", err);
-    }
-
-    // Wait for fade-in to complete
-    return new Promise((resolve) => {
-      const checkFadeIn = () => {
-        if (!this.fadingIn) {
-          resolve();
-          return;
-        }
-        requestAnimationFrame(checkFadeIn);
-      };
-      checkFadeIn();
     });
+
+    this.fadeToOpacity(1);
+    console.log("[Wormhole] Started");
   }
 
   /**
-   * Call this when the new splat has finished loading.
-   * The transition will fade out once the video also finishes (or immediately
-   * if the video has already ended).
+   * Signal that the new splat is loaded. The wormhole will fade out
+   * after the minimum display time has passed.
    */
   signalSplatReady(): void {
     this.splatReady = true;
-    if (!this.video.paused && !this.video.ended) {
-      // Video still playing — wait for it
-      return;
-    }
-    this.startFadeOut();
+    console.log("[Wormhole] Splat ready");
+    this.tryFadeOut();
   }
 
   /**
-   * Returns a promise that resolves when the entire transition
-   * (including fade-out) is complete.
+   * Returns a promise that resolves when the wormhole has fully faded out.
    */
   waitForComplete(): Promise<void> {
     if (!this.active) return Promise.resolve();
     return new Promise((resolve) => {
-      this.onComplete = resolve;
+      this.resolveTransition = resolve;
     });
   }
 
   /**
-   * Must be called every frame from the system's update().
+   * Returns true once fully opaque (fade-in done). Use this to know
+   * when it's safe to unload the old splat.
+   */
+  isFullyOpaque(): boolean {
+    return this.active && this.opacity >= 0.99;
+  }
+
+  isActive(): boolean {
+    return this.active;
+  }
+
+  /**
+   * Must be called every frame.
    */
   tick(camera: THREE.Camera): void {
     if (!this.active) return;
 
-    // Keep sphere centered on camera
     this.sphere.position.copy(camera.position);
 
+    // Animate opacity
     const now = performance.now();
-
-    if (this.fadingIn) {
-      const t = Math.min((now - this.fadeStart) / (FADE_DURATION * 1000), 1);
-      this.material.uniforms.opacity.value = t;
-      if (t >= 1) {
-        this.fadingIn = false;
-      }
-    }
-
-    if (this.fadingOut) {
-      const t = Math.min((now - this.fadeStart) / (FADE_DURATION * 1000), 1);
-      this.material.uniforms.opacity.value = 1 - t;
-      if (t >= 1) {
-        this.finish();
-      }
-    }
+    const elapsed = now - this.fadeStartTime;
+    const t = Math.min(elapsed / FADE_DURATION_MS, 1);
+    this.opacity = this.fadeStartOpacity + (this.targetOpacity - this.fadeStartOpacity) * t;
+    this.material.uniforms.opacity.value = this.opacity;
 
     // Update video texture
     if (this.video.readyState >= this.video.HAVE_CURRENT_DATA) {
       this.texture.needsUpdate = true;
     }
-  }
 
-  private onVideoEnded(): void {
-    if (this.splatReady) {
-      this.startFadeOut();
+    // Check if fade-out is complete
+    if (this.targetOpacity === 0 && this.opacity <= 0.01 && t >= 1) {
+      this.finish();
     }
-    // If splat isn't ready yet, we hold on the last frame until it is
   }
 
-  private startFadeOut(): void {
-    if (this.fadingOut) return;
-    this.fadingOut = true;
-    this.fadeStart = performance.now();
+  private tryFadeOut(): void {
+    if (!this.splatReady) return;
+
+    const elapsed = performance.now() - this.playStartTime;
+    if (elapsed < MIN_DISPLAY_MS) {
+      // Wait for minimum display time
+      setTimeout(() => this.tryFadeOut(), MIN_DISPLAY_MS - elapsed);
+      return;
+    }
+
+    console.log("[Wormhole] Fading out");
+    this.fadeToOpacity(0);
+  }
+
+  private fadeToOpacity(target: number): void {
+    this.fadeStartTime = performance.now();
+    this.fadeStartOpacity = this.opacity;
+    this.targetOpacity = target;
   }
 
   private finish(): void {
@@ -194,17 +209,15 @@ export class WormholeTransition {
     this.sphere.visible = false;
     this.scene.remove(this.sphere);
     this.video.pause();
+    this.opacity = 0;
     this.material.uniforms.opacity.value = 0;
+    console.log("[Wormhole] Complete");
 
-    if (this.onComplete) {
-      const cb = this.onComplete;
-      this.onComplete = null;
+    if (this.resolveTransition) {
+      const cb = this.resolveTransition;
+      this.resolveTransition = null;
       cb();
     }
-  }
-
-  isActive(): boolean {
-    return this.active;
   }
 
   dispose(): void {

@@ -31,7 +31,6 @@ export class TimeMachineSystem extends createSystem({
   }
 
   update() {
-    // Drive the wormhole animation every frame
     if (this.wormhole?.isActive()) {
       this.wormhole.tick(this.world.camera);
     }
@@ -57,21 +56,21 @@ export class TimeMachineSystem extends createSystem({
     this.onEraChange?.(era);
 
     try {
-      // 1. Start wormhole video (fades in over the current scene)
-      await this.wormhole!.play();
+      // 1. Start wormhole (non-blocking — just begins fade-in)
+      this.wormhole!.start();
 
-      // 2. Now fully covered — unload old splat (no animation needed)
+      // 2. Wait a beat for wormhole to cover the scene
+      await this.waitForOpaque();
+
+      // 3. Unload old splat (hidden behind wormhole)
       await splatSystem.unload(this.splatEntity, { animate: false });
 
-      // 3. Update component URLs
+      // 4. Set new URLs and load
       this.splatEntity.setValue(GaussianSplatLoader, "splatUrl", world.splatUrl);
       this.splatEntity.setValue(GaussianSplatLoader, "meshUrl", world.meshUrl);
-
-      // 4. Load new splat while wormhole video plays
       await splatSystem.load(this.splatEntity, { animate: false });
 
-      // 5. Splat is ready — tell wormhole it can fade out
-      //    (waits for video to finish if still playing)
+      // 5. Splat loaded — tell wormhole to fade out
       this.wormhole!.signalSplatReady();
       await this.wormhole!.waitForComplete();
 
@@ -79,13 +78,26 @@ export class TimeMachineSystem extends createSystem({
       console.log(`[TimeMachine] Switched to ${era}`);
     } catch (err) {
       console.error(`[TimeMachine] Failed to switch to ${era}:`, err);
-      // Revert UI on failure
       this.onEraChange?.(this.currentEra);
-      // Force-end transition so user isn't stuck
+      // Force end transition
       this.wormhole!.signalSplatReady();
     } finally {
       this.switching = false;
     }
+  }
+
+  private waitForOpaque(): Promise<void> {
+    return new Promise((resolve) => {
+      const check = () => {
+        if (this.wormhole!.isFullyOpaque()) {
+          resolve();
+          return;
+        }
+        requestAnimationFrame(check);
+      };
+      // Start checking after a short delay to let the fade begin
+      setTimeout(check, 50);
+    });
   }
 
   async next(): Promise<void> {
