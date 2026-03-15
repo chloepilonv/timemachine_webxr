@@ -6,15 +6,45 @@ export class ConvaiAgent {
   client: ConvaiClient | null = null;
   mesh: THREE.Object3D | null = null;
   isTalking: boolean = false;
+  lastTranscript: string = "";
 
   init() {
     if (this.client) return;
+
+    const apiKey = (import.meta as any).env.VITE_CONVAI_API_KEY;
+    const characterId = (import.meta as any).env.VITE_CONVAI_CHARACTER_ID;
+
+    console.log("[ConvaiAgent] Initializing with characterId:", characterId);
+    console.log("[ConvaiAgent] API key present:", !!apiKey);
+
     this.client = new ConvaiClient({
-      apiKey: (import.meta as any).env.VITE_CONVAI_API_KEY,
-      characterId: (import.meta as any).env.VITE_CONVAI_CHARACTER_ID,
+      apiKey,
+      characterId,
       enableAudio: true,
-      // @ts-ignore
-      enableFaceModel: true,
+      enableFacialData: false,
+    });
+
+    // CRITICAL: This callback receives the AI's response (text + audio)
+    this.client.setResponseCallback((response: any) => {
+      // The audio is handled automatically by the SDK's internal audio player.
+      // Here we just log the text transcript for debugging.
+      if (response?.hasAudioResponse?.()) {
+        const audioResponse = response.getAudioResponse();
+        if (audioResponse) {
+          const textData = audioResponse.getTextData();
+          if (textData) {
+            this.lastTranscript = textData;
+            console.log("[ConvaiAgent] AI says:", textData);
+          }
+          const userData = audioResponse.getUserQuery?.();
+          if (userData) {
+            const userTranscript = userData.getTextData();
+            if (userTranscript) {
+              console.log("[ConvaiAgent] User said:", userTranscript);
+            }
+          }
+        }
+      }
     });
 
     this.client.setErrorCallback((type: string, statusMessage: string) => {
@@ -22,12 +52,14 @@ export class ConvaiAgent {
     });
 
     this.client.onAudioPlay(() => {
-      console.log("[ConvaiAgent] Speaking...");
+      console.log("[ConvaiAgent] 🔊 Agent audio playing...");
     });
 
     this.client.onAudioStop(() => {
-      console.log("[ConvaiAgent] Stopped speaking.");
+      console.log("[ConvaiAgent] 🔇 Agent audio stopped.");
     });
+
+    console.log("[ConvaiAgent] ✅ Initialized successfully.");
   }
 
   async loadModel(scene: THREE.Scene, position: THREE.Vector3) {
@@ -44,7 +76,6 @@ export class ConvaiAgent {
             if (node instanceof THREE.Mesh) {
               node.castShadow = true;
               node.receiveShadow = true;
-              // Make sure materials are ok for environment
               if (node.material && node.material instanceof THREE.MeshStandardMaterial) {
                 node.material.envMapIntensity = 1.0;
               }
@@ -52,11 +83,12 @@ export class ConvaiAgent {
           });
 
           scene.add(this.mesh);
+          console.log("[ConvaiAgent] ✅ Avaturn model loaded at", position.toArray());
           resolve();
         },
         undefined,
         (err) => {
-          console.error("Failed to load Avaturn model:", err);
+          console.error("[ConvaiAgent] ❌ Failed to load Avaturn model:", err);
           reject(err);
         }
       );
@@ -64,15 +96,21 @@ export class ConvaiAgent {
   }
 
   startInteraction() {
-    if (!this.client) return;
-    console.log("[ConvaiAgent] Start listening...");
+    if (!this.client) {
+      console.error("[ConvaiAgent] Cannot start — client not initialized!");
+      return;
+    }
+    console.log("[ConvaiAgent] 🎤 Start listening...");
     this.isTalking = true;
     this.client.startAudioChunk();
   }
 
   stopInteraction() {
-    if (!this.client) return;
-    console.log("[ConvaiAgent] Stop listening.");
+    if (!this.client) {
+      console.error("[ConvaiAgent] Cannot stop — client not initialized!");
+      return;
+    }
+    console.log("[ConvaiAgent] ⏹️ Stop listening — sending audio to Convai...");
     this.isTalking = false;
     this.client.endAudioChunk();
   }
