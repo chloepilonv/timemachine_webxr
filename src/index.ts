@@ -105,7 +105,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 })
   .then(async (world) => {
     world.camera.position.set(0, 0.2, 0);
-    const SPLAT_EYE_HEIGHT = 0.6;
+    const SPLAT_EYE_HEIGHT = 1.0;
 
     world.scene.background = new THREE.Color(0x000000);
     world.scene.add(new THREE.AmbientLight(0xffffff, 1.0));
@@ -285,9 +285,8 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       loadingBarContainer.classList.add("hidden");
       loadingStatus.classList.add("hidden");
     }, 600);
-    enterBtn.disabled = false;
-    enterBtn.textContent = "Enter the Time Machine";
-    welcomePanel.setReady();
+    // Auto-enter once world is loaded
+    enterExperience(welcomePanel, temporalConsole, audioManager, timeMachine);
 
     // Auto-hide HTML menu in VR
     world.visibilityState.subscribe((state) => {
