@@ -11,8 +11,8 @@
 import * as THREE from "three";
 
 const VIDEO_PATH = "./wormhole.mp4";
-const FADE_DURATION_MS = 200;
-const MIN_DISPLAY_MS = 800; // minimum time to show the wormhole
+const FADE_DURATION_MS = 500;
+const MIN_DISPLAY_MS = 5000; // let the wormhole video play (~6s matches audio)
 
 export class WormholeTransition {
   private video: HTMLVideoElement;
@@ -139,7 +139,7 @@ export class WormholeTransition {
     this.playStartTime = performance.now();
 
     this.video.currentTime = 0;
-    this.video.playbackRate = 4.0;
+    this.video.playbackRate = 1.5; // slightly faster than real-time, ~6s matches audio
     this.video.play().catch((err) => {
       console.warn("[Wormhole] Video play failed:", err);
       // Even if video fails we proceed — the sphere shows black which is

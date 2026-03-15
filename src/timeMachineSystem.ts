@@ -18,6 +18,7 @@ import {
 } from "./gaussianSplatLoader.js";
 import { Era, ERA_ORDER, WORLDS } from "./worlds.js";
 import { WormholeTransition } from "./wormholeTransition.js";
+import { AudioManager } from "./audioManager.js";
 
 /** Max time for the entire switchTo flow before we force-abort. */
 const SWITCH_TIMEOUT_MS = 40_000;
@@ -39,6 +40,7 @@ export class TimeMachineSystem extends createSystem({
   private switching = false;
   private onEraChange: ((era: Era) => void) | null = null;
   private wormhole: WormholeTransition | null = null;
+  private audioManager: AudioManager | null = null;
 
   /**
    * Resolved from the system's update() tick when the wormhole reaches
@@ -91,6 +93,10 @@ export class TimeMachineSystem extends createSystem({
     this.onEraChange = cb;
   }
 
+  setAudioManager(audio: AudioManager) {
+    this.audioManager = audio;
+  }
+
   async switchTo(era: Era): Promise<void> {
     if (this.switching || era === this.currentEra) return;
     if (!this.splatEntity) return;
@@ -103,6 +109,9 @@ export class TimeMachineSystem extends createSystem({
 
     // Update UI label immediately
     this.onEraChange?.(era);
+
+    // Play transition whoosh
+    this.audioManager?.playTransition();
 
     // Wrap the entire flow in an overall timeout so `switching` can never
     // stay true forever, no matter what goes wrong internally.
@@ -156,13 +165,19 @@ export class TimeMachineSystem extends createSystem({
       ),
     ]);
 
-    // 3. Splat loaded — fade out wormhole
+    // 3. Splat loaded — crossfade ambient audio to new era
     this.currentEra = era;
+    this.audioManager?.switchEra(era);
+
+    // 4. Fade out wormhole + transition audio
     this.wormhole!.signalSplatReady();
     await Promise.race([
       this.wormhole!.waitForComplete(),
       new Promise<void>((r) => setTimeout(r, FADE_OUT_TIMEOUT_MS)),
     ]);
+
+    // Stop transition audio
+    this.audioManager?.stopTransition();
 
     // If the wormhole is somehow still active after the timeout, force it off.
     if (this.wormhole!.isActive()) {

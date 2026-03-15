@@ -22,6 +22,7 @@ import {
 import { TimeMachineSystem } from "./timeMachineSystem.js";
 import { WORLDS } from "./worlds.js";
 import { convaiAgent } from "./convaiAgent.js";
+import { AudioManager } from "./audioManager.js";
 
 
 // ------------------------------------------------------------
@@ -58,6 +59,18 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       .registerSystem(PanelSystem)
       .registerSystem(GaussianSplatLoaderSystem)
       .registerSystem(TimeMachineSystem);
+
+    // Initialize audio (ambient loops + transition sound)
+    const audioManager = new AudioManager(world.camera);
+    const timeMachine = world.getSystem(TimeMachineSystem)!;
+    timeMachine.setAudioManager(audioManager);
+
+    // Start ambient audio on first XR entry or user interaction
+    world.visibilityState.subscribe((state) => {
+      if (state !== VisibilityState.NonImmersive) {
+        audioManager.start("present");
+      }
+    });
 
 
     // ------------------------------------------------------------
@@ -145,7 +158,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
           panelEntity.removeComponent(ScreenSpace);
         }
         // Re-parent UIKitDocument from camera back to panel entity
-        const doc = PanelDocument.data.document[panelEntity.index];
+        const doc = PanelDocument.data.document[panelEntity.index] as THREE.Object3D | undefined;
         if (doc && doc.parent !== panelEntity.object3D) {
           panelEntity.object3D!.add(doc);
         }
