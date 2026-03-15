@@ -21,8 +21,8 @@ export const WORLDS: Record<Era, WorldDef> = {
     era: "past",
     label: "1920s",
     year: "1920",
-    splatUrl: "./splats/past_hr.spz",
-    meshUrl: "./splats/past_hr-collider.glb",
+    splatUrl: "./splats/past.spz",
+    meshUrl: "",
     color: 0xd4a574,
   },
   present: {

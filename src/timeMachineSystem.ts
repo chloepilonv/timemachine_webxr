@@ -136,8 +136,7 @@ export class TimeMachineSystem extends createSystem({
     world: { splatUrl: string; meshUrl: string },
     splatSystem: GaussianSplatLoaderSystem,
   ): Promise<void> {
-    // 1. Start wormhole flash
-    this.wormhole!.setTargetEra(era);
+    // 1. Start wormhole fade-in
     this.wormhole!.start();
     await this.waitForOpaque();
 
