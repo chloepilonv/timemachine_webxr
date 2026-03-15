@@ -180,9 +180,12 @@ export class WelcomePanel {
     }
   }
 
+  private rayLines: THREE.Line[] = [];
+
   private setupXRControllers(renderer: THREE.WebGLRenderer): void {
     for (let i = 0; i < 2; i++) {
       const controller = renderer.xr.getController(i);
+
       controller.addEventListener("selectstart", () => {
         if (!this.root.visible) return;
         const hovIdx = (controller as any).userData.welcomeHovered;
@@ -191,6 +194,33 @@ export class WelcomePanel {
           this.onEnter();
         }
       });
+
+      // Ray line
+      const pts = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -5)];
+      const rayMat = new THREE.LineBasicMaterial({
+        color: 0x8866ff,
+        transparent: true,
+        opacity: 0.5,
+      });
+      const rayLine = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(pts),
+        rayMat,
+      );
+      rayLine.frustumCulled = false;
+      controller.add(rayLine);
+      this.rayLines.push(rayLine);
+
+      // Reticle dot
+      const dot = new THREE.Mesh(
+        new THREE.CircleGeometry(0.004, 12),
+        new THREE.MeshBasicMaterial({
+          color: 0xcc99ff,
+          side: THREE.DoubleSide,
+        }),
+      );
+      dot.position.z = -0.015;
+      dot.rotation.x = -Math.PI / 2;
+      controller.add(dot);
     }
   }
 
@@ -202,7 +232,15 @@ export class WelcomePanel {
       this.raycaster.ray.direction.set(0, 0, -1).applyMatrix4(this.tempMatrix);
 
       const hits = this.raycaster.intersectObject(this.enterBtn);
-      (controller as any).userData.welcomeHovered = hits.length > 0;
+      const hovered = hits.length > 0;
+      (controller as any).userData.welcomeHovered = hovered;
+
+      // Change ray color on hover
+      if (this.rayLines[i]) {
+        const mat = this.rayLines[i].material as THREE.LineBasicMaterial;
+        mat.color.setHex(hovered ? 0xffcc44 : 0x8866ff);
+        mat.opacity = hovered ? 0.8 : 0.5;
+      }
     }
   }
 
