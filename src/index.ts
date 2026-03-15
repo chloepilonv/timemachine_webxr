@@ -62,27 +62,29 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     // ------------------------------------------------------------
     // Gaussian Splat — TEMPORARILY DISABLED for voice testing
     // ------------------------------------------------------------
-    // const presentWorld = WORLDS.present;
-    // const splatEntity = world.createTransformEntity();
-    // splatEntity.addComponent(GaussianSplatLoader, {
-    //   splatUrl: presentWorld.splatUrl,
-    //   meshUrl: presentWorld.meshUrl,
-    //   autoLoad: true,
-    //   animate: false,
-    //   enableLod: true,
-    //   lodSplatScale: 1.0,
-    // });
+    const presentWorld = WORLDS.present;
+    const splatEntity = world.createTransformEntity();
+    splatEntity.addComponent(GaussianSplatLoader, {
+      splatUrl: presentWorld.splatUrl,
+      meshUrl: presentWorld.meshUrl,
+      autoLoad: true,
+      animate: false,
+      enableLod: true,
+      lodSplatScale: 0.2, // Drastically lower quality for testing
+    });
 
-    // const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
+    const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
+    splatSystem.setPerformanceMode(true); // Enable low-poly mode for voice testing
 
-    // // Play splat animation when entering XR
-    // world.visibilityState.subscribe((state) => {
-    //   if (state !== VisibilityState.NonImmersive) {
-    //     splatSystem.replayAnimation(splatEntity).catch((err) => {
-    //       console.error("[World] Failed to replay splat animation:", err);
-    //     });
-    //   }
-    // });
+    // Play splat animation when entering XR
+    world.visibilityState.subscribe((state) => {
+      if (state !== VisibilityState.NonImmersive) {
+        splatSystem.replayAnimation(splatEntity).catch((err) => {
+          console.error("[World] Failed to replay splat animation:", err);
+        });
+      }
+    });
+    // Gaussian Splat — TEMPORARILY DISABLED for voice testing
 
 
     // ------------------------------------------------------------

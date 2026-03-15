@@ -189,38 +189,46 @@ timemachine_webxr/
 
 ## Performance Tuning
 
-SparkJS quality settings are in `src/gaussianSplatLoader.ts`. For smoother performance when running voice control (Convai API), the defaults are already optimized:
+SparkJS quality settings are located in `src/gaussianSplatLoader.ts`. For smoother performance when running voice control (Convai API) simultaneously with millions of splats on lower-end XR hardware (like the Pico), we implemented the following strategies:
+
+### 1. Splat Freezing During Voice Input (Recommended)
+When the microphone is active via the Convai SDK, it heavily utilizes the XR2 chip and audio worklets. To prevent frame drops and lag, we freeze the Gaussian Splat renderer while the user is talking.
 
 ```ts
-const spark = new SparkRenderer({
-  lodSplatScale: 1.0,    // balanced quality vs. performance
-  behindFoveate: 0.5,    // reduced foveation for frame rate
+// src/gaussianSplatLoader.ts
+// Option 2: Freeze the splats in place (stop sorting/updating loop)
+// The world stays visible, but eats 0 GPU cycles for updates
+setPaused(paused: boolean): void {
+  if (this.sparkRenderer) {
+    this.sparkRenderer.autoUpdate = !paused; 
+  }
+}
+```
+
+This is hooked up to the **Talk Button** in `src/uiPanel.ts`:
+```ts
+// src/uiPanel.ts
+splatSystem?.setPaused(true);  // Freeze splats while talking
+convaiAgent.startInteraction();
+
+splatSystem?.setPaused(false); // Resume sorting when done
+convaiAgent.stopInteraction();
+```
+
+### 2. Lowering the LOD Scale
+To permanently reduce the number of splats rendered at any given time, the `lodSplatScale` is currently drastically reduced for testing. Change this back to `1.0` for full resolution:
+
+```ts
+// src/index.ts
+splatEntity.addComponent(GaussianSplatLoader, {
+  // ...
+  lodSplatScale: 0.2, // Extremely low poly mode for testing (default: 1.0)
 });
-spark.outsideFoveate = 0.5;
 ```
 
-For even better performance during voice interactions, call the performance mode hook:
-
-```ts
-const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
-splatSystem.setPerformanceMode(true);  // Lower quality during voice
-// ... voice processing ...
-splatSystem.setPerformanceMode(false); // Restore quality when done
-```
-
-For Pico headsets or low-end devices, you can further lower these in `src/gaussianSplatLoader.ts`:
-
-```ts
-lodSplatScale: 0.5,
-behindFoveate: 0.1,
-outsideFoveate: 0.3,
-```
-
-### Async/GRPC Optimizations
-- **Convai WebRTC**: The SDK uses asynchronous WebRTC for audio streaming. Ensure audio processing doesn't block the main thread—voice input/output is handled in background workers.
-- **Rendering Async**: Splat loading now uses `requestIdleCallback` for non-animated loads, deferring heavy GPU work to idle browser time.
-- **Animation Throttling**: Splat animations update every 2nd frame to reduce CPU overhead.
-- If lag persists, profile with Chrome DevTools (Performance tab) to identify bottlenecks—focus on GPU/CPU usage during voice interactions.
+### 3. Asynchronous Loading
+- Splat loading uses `requestIdleCallback` for non-animated loads, deferring heavy GPU work to idle browser time.
+- Splat animations update every 2nd frame to reduce CPU overhead.
 
 ## TODO
 

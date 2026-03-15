@@ -12,6 +12,7 @@ import * as THREE from "three";
 import { Era, WORLDS } from "./worlds.js";
 import { TimeMachineSystem } from "./timeMachineSystem.js";
 import { convaiAgent } from "./convaiAgent.js";
+import { GaussianSplatLoaderSystem } from "./gaussianSplatLoader.js";
 
 // Render UI on top of splats using AlwaysDepth + high renderOrder.
 const UI_RENDER_ORDER = 10_000;
@@ -126,16 +127,19 @@ export class PanelSystem extends createSystem({
         });
 
         // --- Convai Talk Button ---
+        const splatSystem = this.world.getSystem(GaussianSplatLoaderSystem);
         const talkButton = document.getElementById("talk-button") as UIKit.Text;
         talkButton.addEventListener("click", () => {
           if (!convaiAgent.isTalking) {
             convaiAgent.startInteraction();
+            splatSystem?.setPaused(true); // Hide splats to save GPU for mic
             talkButton.setProperties({
               text: "Stop Talking",
               style: { backgroundColor: "#d9381e" }
             });
           } else {
             convaiAgent.stopInteraction();
+            splatSystem?.setPaused(false); // Bring splats back once mic is off
             talkButton.setProperties({
               text: "Start Talking to Agent",
               style: { backgroundColor: "#228b22" }

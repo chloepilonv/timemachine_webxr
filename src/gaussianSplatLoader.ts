@@ -303,6 +303,12 @@ export class GaussianSplatLoaderSystem extends createSystem({
   }
 
 
+  // ==========================================================
+  // ⚠️ WARNING: DO NOT MODIFY OR REMOVE THESE METHODS ⚠️
+  // These are critical for Convai.ai voice integration performance on Pico.
+  // See PairCodingRules.md and README.md (Performance Tuning) for details.
+  // ==========================================================
+
   // ----------------------------------------------------------
   // Performance Mode — hook for voice control to adjust quality
   // ----------------------------------------------------------
@@ -311,7 +317,7 @@ export class GaussianSplatLoaderSystem extends createSystem({
 
     if (enabled) {
       // Lower quality for performance during voice processing
-      this.sparkRenderer.lodSplatScale = 0.5;
+      this.sparkRenderer.lodSplatScale = 0.2; // Even lower for testing
       this.sparkRenderer.behindFoveate = 0.1;
       this.sparkRenderer.outsideFoveate = 0.3;
       console.log("[GaussianSplatLoader] Performance mode enabled — reduced splat quality.");
@@ -323,6 +329,27 @@ export class GaussianSplatLoaderSystem extends createSystem({
       console.log("[GaussianSplatLoader] Performance mode disabled — restored splat quality.");
     }
   }
+
+  // ----------------------------------------------------------
+  // Render Pausing - freeze splats while mic is open to fix lag
+  // ----------------------------------------------------------
+  setPaused(paused: boolean): void {
+    if (!this.sparkRenderer) return;
+    
+    if (paused) {
+      // Option 2: Freeze the splats in place (stop sorting/updating)
+      // They remain visible, but don't eat CPU/GPU cycles for updates
+      this.sparkRenderer.autoUpdate = false;
+      console.log("[GaussianSplatLoader] Splat renderer PAUSED (frozen).");
+    } else {
+      this.sparkRenderer.autoUpdate = true;
+      console.log("[GaussianSplatLoader] Splat renderer RESUMED.");
+    }
+  }
+
+  // ==========================================================
+  // ⚠️ END OF CRITICAL VOICE PERFORMANCE METHODS ⚠️
+  // ==========================================================
 
 
   // ----------------------------------------------------------
