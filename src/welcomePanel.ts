@@ -70,7 +70,7 @@ export class WelcomePanel {
 
     // Enter button
     const btnCanvas = this.createTextCanvas(
-      "ENTER THE TIME MACHINE",
+      "PRESS  A  TO ENTER",
       512, 64,
       "bold 28px Orbitron, sans-serif",
       "#c8b8ff",

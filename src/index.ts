@@ -304,11 +304,36 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
 
       // Tick loop for both panels
       const clock = new THREE.Clock();
+      let welcomeDismissed = false;
       const tickLoop = () => {
         requestAnimationFrame(tickLoop);
         const delta = clock.getDelta();
         welcomePanel.tick(delta, renderer);
         if (temporalConsole) temporalConsole.tick(delta, renderer);
+
+        // A-button to enter (works on Quest + Pico) — check raw XR gamepads
+        if (!welcomeDismissed && renderer.xr.isPresenting) {
+          const session = renderer.xr.getSession();
+          if (session) {
+            for (const source of session.inputSources) {
+              if (source.gamepad) {
+                // Button 4 = A/X on Quest/Pico controllers
+                const btn = source.gamepad.buttons[4];
+                if (btn && btn.pressed) {
+                  welcomeDismissed = true;
+                  welcomePanel.hide();
+                  if (temporalConsole) temporalConsole.show();
+                  talkBtnPersistent.classList.add("visible");
+                  if (!audioStarted) {
+                    audioStarted = true;
+                    audioManager.start("present");
+                  }
+                  break;
+                }
+              }
+            }
+          }
+        }
       };
       tickLoop();
 
