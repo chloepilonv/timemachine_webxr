@@ -189,20 +189,29 @@ timemachine_webxr/
 
 ## Performance Tuning
 
-SparkJS quality settings are in `src/gaussianSplatLoader.ts`:
+SparkJS quality settings are in `src/gaussianSplatLoader.ts`. For smoother performance when running voice control (Convai API), the defaults are already optimized:
 
 ```ts
 const spark = new SparkRenderer({
-  lodSplatScale: 2.0,    // higher = more splats rendered (sharper)
-  behindFoveate: 1.0,    // 1.0 = full quality everywhere
+  lodSplatScale: 1.0,    // balanced quality vs. performance
+  behindFoveate: 0.5,    // reduced foveation for frame rate
 });
-spark.outsideFoveate = 1.0;
+spark.outsideFoveate = 0.5;
 ```
 
-For Pico headsets, you may want to lower these for smoother frame rates:
+For even better performance during voice interactions, call the performance mode hook:
 
 ```ts
-lodSplatScale: 1.0,
+const splatSystem = world.getSystem(GaussianSplatLoaderSystem)!;
+splatSystem.setPerformanceMode(true);  // Lower quality during voice
+// ... voice processing ...
+splatSystem.setPerformanceMode(false); // Restore quality when done
+```
+
+For Pico headsets or low-end devices, you can further lower these in `src/gaussianSplatLoader.ts`:
+
+```ts
+lodSplatScale: 0.5,
 behindFoveate: 0.1,
 outsideFoveate: 0.3,
 ```

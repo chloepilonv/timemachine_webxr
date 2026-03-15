@@ -64,10 +64,10 @@ export class GaussianSplatLoaderSystem extends createSystem({
     const spark = new SparkRenderer({
       renderer: this.world.renderer,
       enableLod: true,
-      lodSplatScale: 2.0,
-      behindFoveate: 1.0,
+      lodSplatScale: 1.0,  // Lowered from 2.0 for better performance
+      behindFoveate: 0.5,  // Reduced foveation for smoother frame rates
     });
-    spark.outsideFoveate = 1.0;
+    spark.outsideFoveate = 0.5;  // Reduced foveation outside fovea
     spark.renderOrder = -10;
     this.world.scene.add(spark);
     this.sparkRenderer = spark;
@@ -268,8 +268,26 @@ export class GaussianSplatLoaderSystem extends createSystem({
 
 
   // ----------------------------------------------------------
-  // Cleanup – dispose GPU resources and detach from the scene
+  // Performance Mode — hook for voice control to adjust quality
   // ----------------------------------------------------------
+  setPerformanceMode(enabled: boolean): void {
+    if (!this.sparkRenderer) return;
+
+    if (enabled) {
+      // Lower quality for performance during voice processing
+      this.sparkRenderer.lodSplatScale = 0.5;
+      this.sparkRenderer.behindFoveate = 0.1;
+      this.sparkRenderer.outsideFoveate = 0.3;
+      console.log("[GaussianSplatLoader] Performance mode enabled — reduced splat quality.");
+    } else {
+      // Restore higher quality when voice is idle
+      this.sparkRenderer.lodSplatScale = 1.0;
+      this.sparkRenderer.behindFoveate = 0.5;
+      this.sparkRenderer.outsideFoveate = 0.5;
+      console.log("[GaussianSplatLoader] Performance mode disabled — restored splat quality.");
+    }
+  }
+
   private removeInstance(entityIndex: number): void {
     const instance = this.instances.get(entityIndex);
     if (!instance) return;
