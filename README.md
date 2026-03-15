@@ -183,6 +183,7 @@ timemachine_webxr/
 │   ├── worlds.ts            # Era definitions (past/present/future URLs)
 │   ├── timeMachineSystem.ts # ECS system for switching between eras
 │   ├── uiPanel.ts           # UI panel system — buttons, era display, XR toggle
+│   ├── convaiAgent.ts          # Convai voice agent + procedural idle animation
 │   ├── gaussianSplatLoader.ts  # SparkJS splat loading/unloading/animation
 │   └── gaussianSplatAnimator.ts # GPU-accelerated fly-in/fly-out effects
 ├── vite.config.ts           # Vite + IWSDK plugins
@@ -215,6 +216,16 @@ lodSplatScale: 1.0,
 behindFoveate: 0.1,
 outsideFoveate: 0.3,
 ```
+
+## Avatar Tuner (Dev Tool)
+
+To adjust the Convai voice agent avatar's position, scale, and rotation in the browser before testing in VR, set `AVATAR_TUNER = true` in `src/index.ts`:
+
+```ts
+const AVATAR_TUNER = true; // flip to false for prod
+```
+
+This shows a lil-gui panel in the top-right corner with sliders for position, uniform scale, and Y rotation. Use the "Log values to console" button to print the final values, then hardcode them back into the source.
 
 ## TODO
 

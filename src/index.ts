@@ -1,5 +1,6 @@
 
 import * as THREE from "three";
+import GUI from "lil-gui";
 import {
   EnvironmentType,
   Interactable,
@@ -59,10 +60,41 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       .registerSystem(TimeMachineSystem);
 
     // Initialize Convai voice agent (lazy load — won't crash app if SDK fails)
+    let agentMesh: THREE.Object3D | null = null;
     import("./convaiAgent.js")
-      .then(({ convaiAgent }) => {
+      .then(async ({ convaiAgent }) => {
         convaiAgent.init();
-        convaiAgent.loadModel(world.scene, new THREE.Vector3(1, 0, -2));
+        await convaiAgent.loadModel(world.scene, new THREE.Vector3(0.5, 0.05, -1.95));
+        agentMesh = convaiAgent.mesh;
+        if (agentMesh) {
+          agentMesh.scale.setScalar(0.45);
+          agentMesh.rotation.y = -0.54;
+        }
+
+        // Debug GUI for avatar placement — set to true to enable, false for prod
+        const AVATAR_TUNER = true;
+        if (agentMesh && AVATAR_TUNER) {
+          const gui = new GUI({ title: "Avatar Tuner" });
+          const pos = gui.addFolder("Position");
+          pos.add(agentMesh.position, "x", -5, 5, 0.05).listen();
+          pos.add(agentMesh.position, "y", -2, 3, 0.05).listen();
+          pos.add(agentMesh.position, "z", -10, 2, 0.05).listen();
+          const scl = gui.addFolder("Scale");
+          const uniformScale = { value: agentMesh.scale.x };
+          scl.add(uniformScale, "value", 0.1, 3, 0.05).name("uniform").onChange((v: number) => {
+            agentMesh!.scale.setScalar(v);
+          });
+          const rot = gui.addFolder("Rotation");
+          rot.add(agentMesh.rotation, "y", -Math.PI, Math.PI, 0.05).name("y (turn)").listen();
+          gui.add({
+            log() {
+              const m = agentMesh!;
+              console.log(`Position: (${m.position.x.toFixed(2)}, ${m.position.y.toFixed(2)}, ${m.position.z.toFixed(2)})`);
+              console.log(`Scale: ${m.scale.x.toFixed(2)}`);
+              console.log(`Rotation Y: ${m.rotation.y.toFixed(2)}`);
+            },
+          }, "log").name("Log values to console");
+        }
       })
       .catch((err) => {
         console.warn("[World] Convai agent unavailable:", err);
@@ -103,6 +135,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     world.visibilityState.subscribe((state) => {
       const inVR = state !== VisibilityState.NonImmersive;
       splatEntity.object3D!.position.y = inVR ? VR_SCENE_LIFT : 0;
+      if (agentMesh) agentMesh.position.y = inVR ? VR_SCENE_LIFT + 0.05 : 0.05;
 
       if (inVR) {
         splatSystem.replayAnimation(splatEntity).catch((err) => {
