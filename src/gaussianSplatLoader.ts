@@ -117,10 +117,15 @@ export class GaussianSplatLoaderSystem extends createSystem({
 
 
   // ----------------------------------------------------------
-  // Frame Loop
+  // Frame Loop — optimized to skip frames for performance
   // ----------------------------------------------------------
+  private frameCount = 0;
   update() {
+    this.frameCount++;
     if (this.animating.size === 0) return;
+
+    // Throttle animation updates to every 2nd frame for better performance
+    if (this.frameCount % 2 !== 0) return;
 
     for (const entityIndex of this.animating) {
       const instance = this.instances.get(entityIndex);
@@ -138,6 +143,7 @@ export class GaussianSplatLoaderSystem extends createSystem({
 
   // ----------------------------------------------------------
   // Load – fetch the .spz splat (and optional collider mesh)
+  // Optimized: Use requestIdleCallback for non-critical loads
   // ----------------------------------------------------------
   async load(
     entity: Entity,
@@ -179,24 +185,53 @@ export class GaussianSplatLoaderSystem extends createSystem({
       this.sparkRenderer.lodSplatScale = lodSplatScale;
     }
 
-    const splat = new SplatMesh({
-      url: splatUrl,
-      lod: enableLod || undefined,
-    });
-    const timeout = new Promise<never>((_, reject) => {
-      setTimeout(
-        () =>
-          reject(
-            new Error(
-              `[GaussianSplatLoader] Timed out loading "${splatUrl}" after ${LOAD_TIMEOUT_MS / 1000}s`,
+    // Optimize: Defer splat creation to idle time if not animating
+    const createSplat = async () => {
+      const splat = new SplatMesh({
+        url: splatUrl,
+        lod: enableLod || undefined,
+      });
+      const timeout = new Promise<never>((_, reject) => {
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                `[GaussianSplatLoader] Timed out loading "${splatUrl}" after ${LOAD_TIMEOUT_MS / 1000}s`,
+              ),
             ),
-          ),
-        LOAD_TIMEOUT_MS,
-      );
-    });
-    await Promise.race([splat.initialized, timeout]);
+          LOAD_TIMEOUT_MS,
+        );
+      });
+      await Promise.race([splat.initialized, timeout]);
+      return splat;
+    };
 
-    let collider: THREE.Group | null = null;
+    let splat: SplatMesh;
+    if (animate) {
+      splat = await createSplat();  // Immediate for animated loads
+    } else {
+      // Lazy load during idle time
+      splat = await new Promise((resolve, reject) => {
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(async () => {
+            try {
+              resolve(await createSplat());
+            } catch (err) {
+              reject(err);
+            }
+          });
+        } else {
+          // Fallback for browsers without requestIdleCallback
+          setTimeout(async () => {
+            try {
+              resolve(await createSplat());
+            } catch (err) {
+              reject(err);
+            }
+          }, 100);
+        }
+      });
+    }
     if (meshUrl) {
       const gltf = await this.gltfLoader.loadAsync(meshUrl);
       collider = gltf.scene;

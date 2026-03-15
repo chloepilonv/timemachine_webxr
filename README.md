@@ -216,6 +216,12 @@ behindFoveate: 0.1,
 outsideFoveate: 0.3,
 ```
 
+### Async/GRPC Optimizations
+- **Convai WebRTC**: The SDK uses asynchronous WebRTC for audio streaming. Ensure audio processing doesn't block the main thread—voice input/output is handled in background workers.
+- **Rendering Async**: Splat loading now uses `requestIdleCallback` for non-animated loads, deferring heavy GPU work to idle browser time.
+- **Animation Throttling**: Splat animations update every 2nd frame to reduce CPU overhead.
+- If lag persists, profile with Chrome DevTools (Performance tab) to identify bottlenecks—focus on GPU/CPU usage during voice interactions.
+
 ## TODO
 
 - [ ] Improve past & future splat quality — currently noticeably fuzzier than present due to lower-resolution input tiles from Gemini's image editing. See [IMPROVEMENTS.md](IMPROVEMENTS.md) for fix options.
