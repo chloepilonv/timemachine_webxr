@@ -20,6 +20,7 @@ import {
 } from "./gaussianSplatLoader.js";
 import { TimeMachineSystem } from "./timeMachineSystem.js";
 import { WORLDS } from "./worlds.js";
+import { convaiAgent } from "./convaiAgent.js";
 
 
 // ------------------------------------------------------------
@@ -52,6 +53,11 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       .registerSystem(GaussianSplatLoaderSystem)
       .registerSystem(TimeMachineSystem);
 
+    // Initialize Convai
+    convaiAgent.init();
+    convaiAgent.loadModel(world.scene, new THREE.Vector3(1, 0, -2)).then(() => {
+      console.log("Avaturn model loaded into scene.");
+    });
 
     // ------------------------------------------------------------
     // Gaussian Splat — starts with the present-day world

@@ -11,6 +11,7 @@ import {
 import * as THREE from "three";
 import { Era, WORLDS } from "./worlds.js";
 import { TimeMachineSystem } from "./timeMachineSystem.js";
+import { convaiAgent } from "./convaiAgent.js";
 
 // Render UI on top of splats using AlwaysDepth + high renderOrder.
 const UI_RENDER_ORDER = 10_000;
@@ -122,6 +123,24 @@ export class PanelSystem extends createSystem({
                 ? "Enter XR"
                 : "Exit to Browser",
           });
+        });
+
+        // --- Convai Talk Button ---
+        const talkButton = document.getElementById("talk-button") as UIKit.Text;
+        talkButton.addEventListener("click", () => {
+          if (!convaiAgent.isTalking) {
+            convaiAgent.startInteraction();
+            talkButton.setProperties({
+              text: "Stop Talking",
+              style: { backgroundColor: "#d9381e" }
+            });
+          } else {
+            convaiAgent.stopInteraction();
+            talkButton.setProperties({
+              text: "Start Talking to Agent",
+              style: { backgroundColor: "#228b22" }
+            });
+          }
         });
 
         // --- Era labels ---

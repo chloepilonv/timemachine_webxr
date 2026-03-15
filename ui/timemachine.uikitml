@@ -141,6 +141,20 @@
     text-align: center;
     margin-top: 0.5;
   }
+
+  #talk-button {
+    width: 100%;
+    padding: 1.2;
+    margin-top: 0.5;
+    background-color: #228b22;
+    color: #ffffff;
+    border-radius: 1.2;
+    border-width: 0;
+    font-size: 2;
+    font-weight: bold;
+    text-align: center;
+    cursor: pointer;
+  }
 </style>
 <div class="panel-container">
   <span class="title">TIME MACHINE</span>
@@ -162,6 +176,7 @@
   </div>
 
   <div class="divider-thin"></div>
+  <button id="talk-button">Start Talking to Agent</button>
   <button id="xr-button">Enter XR</button>
   <span class="location">Embarcadero, SF</span>
 </div>

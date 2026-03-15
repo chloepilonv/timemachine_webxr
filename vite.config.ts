@@ -37,7 +37,6 @@ function deduplicateThree(): Plugin {
     },
   };
 }
-
 export default defineConfig({
   plugins: [
     deduplicateThree(),
@@ -60,8 +59,8 @@ export default defineConfig({
     port: 8081,
     open: true,
     https: {
-      key: fs.readFileSync(path.resolve(__dirname, ".key.pem")),
-      cert: fs.readFileSync(path.resolve(__dirname, ".cert.pem")),
+      key: fs.existsSync(path.resolve(__dirname, ".key.pem")) ? fs.readFileSync(path.resolve(__dirname, ".key.pem")) : undefined,
+      cert: fs.existsSync(path.resolve(__dirname, ".cert.pem")) ? fs.readFileSync(path.resolve(__dirname, ".cert.pem")) : undefined,
     },
   },
   build: {
