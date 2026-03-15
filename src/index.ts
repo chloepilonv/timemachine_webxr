@@ -103,7 +103,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     sceneUnderstanding: false,
   },
 })
-  .then((world) => {
+  .then(async (world) => {
     world.camera.position.set(0, 0.2, 0);
     const SPLAT_EYE_HEIGHT = 0.6;
 
@@ -146,7 +146,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     splatEntity.addComponent(GaussianSplatLoader, {
       splatUrl: presentWorld.splatUrl,
       meshUrl: presentWorld.meshUrl,
-      autoLoad: true,
+      autoLoad: false,
       animate: false,
       enableLod: true,
       lodSplatScale: 2.0,
@@ -274,6 +274,9 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
       }
     }
 
+    // ── Load the initial splat, then mark ready ──
+    await splatSystem.load(splatEntity, { animate: false });
+
     // ── World ready — show loading complete ──
     clearInterval(loadInterval);
     loadingBar.style.width = "100%";
@@ -284,6 +287,7 @@ World.create(document.getElementById("scene-container") as HTMLDivElement, {
     }, 600);
     enterBtn.disabled = false;
     enterBtn.textContent = "Enter the Time Machine";
+    welcomePanel.setReady();
 
     // Auto-hide HTML menu in VR
     world.visibilityState.subscribe((state) => {

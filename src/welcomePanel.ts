@@ -18,6 +18,10 @@ export class WelcomePanel {
   private camera: THREE.Camera | null = null;
   private hovered = false;
   private controllersSetUp = false;
+  private ready = false;
+  private loadingLabel: THREE.Mesh | null = null;
+  private btnLabel: THREE.Mesh | null = null;
+  private btnBorder: THREE.Mesh | null = null;
 
   constructor(scene: THREE.Scene, onEnter: () => void) {
     this.scene = scene;
@@ -28,9 +32,9 @@ export class WelcomePanel {
     this.root.visible = true;
     scene.add(this.root);
 
-    // Background panel
+    // Background panel (charcoal)
     const bgMat = new THREE.MeshBasicMaterial({
-      color: 0x0a0a1e,
+      color: 0x1a1410,
       transparent: true,
       opacity: 0.85,
       side: THREE.DoubleSide,
@@ -38,9 +42,9 @@ export class WelcomePanel {
     const bg = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.9), bgMat);
     this.root.add(bg);
 
-    // Border glow
+    // Border glow (copper)
     const borderMat = new THREE.MeshBasicMaterial({
-      color: 0x6644cc,
+      color: 0xd08030,
       transparent: true,
       opacity: 0.6,
       side: THREE.DoubleSide,
@@ -49,12 +53,12 @@ export class WelcomePanel {
     border.position.z = -0.001;
     this.root.add(border);
 
-    // Title texture
+    // Title texture (copper)
     const titleCanvas = this.createTextCanvas(
       "TIME MACHINE",
       512, 80,
       "bold 48px Orbitron, sans-serif",
-      "#c8b8ff",
+      "#e8a050",
     );
     const titleTex = new THREE.CanvasTexture(titleCanvas);
     const titleMat = new THREE.MeshBasicMaterial({
@@ -68,22 +72,41 @@ export class WelcomePanel {
     this.root.add(titleMesh);
 
 
-    // Enter button
+    // Loading label (shown while world loads)
+    const loadCanvas = this.createTextCanvas(
+      "LOADING WORLD...",
+      512, 64,
+      "bold 28px Orbitron, sans-serif",
+      "#a08060",
+    );
+    const loadTex = new THREE.CanvasTexture(loadCanvas);
+    const loadLabelMat = new THREE.MeshBasicMaterial({
+      map: loadTex,
+      transparent: true,
+      side: THREE.DoubleSide,
+    });
+    this.loadingLabel = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 0.1), loadLabelMat);
+    this.loadingLabel.position.y = -0.15;
+    this.loadingLabel.position.z = 0.003;
+    this.root.add(this.loadingLabel);
+
+    // Enter button (hidden until ready — cyan text on copper bg)
     const btnCanvas = this.createTextCanvas(
       "PRESS  A  TO ENTER",
       512, 64,
       "bold 28px Orbitron, sans-serif",
-      "#c8b8ff",
+      "#5ce0d0",
     );
     const btnTex = new THREE.CanvasTexture(btnCanvas);
     this.enterMat = new THREE.MeshBasicMaterial({
-      color: 0x6644cc,
+      color: 0xd08030,
       transparent: true,
       opacity: 0.8,
     });
     this.enterBtn = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 0.14), this.enterMat);
     this.enterBtn.position.y = -0.15;
     this.enterBtn.position.z = 0.002;
+    this.enterBtn.visible = false;
     this.root.add(this.enterBtn);
 
     // Button label on top
@@ -92,22 +115,24 @@ export class WelcomePanel {
       transparent: true,
       side: THREE.DoubleSide,
     });
-    const btnLabel = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 0.1), btnLabelMat);
-    btnLabel.position.y = -0.15;
-    btnLabel.position.z = 0.003;
-    this.root.add(btnLabel);
+    this.btnLabel = new THREE.Mesh(new THREE.PlaneGeometry(0.75, 0.1), btnLabelMat);
+    this.btnLabel.position.y = -0.15;
+    this.btnLabel.position.z = 0.003;
+    this.btnLabel.visible = false;
+    this.root.add(this.btnLabel);
 
-    // Border around button
+    // Border around button (copper)
     const btnBorderMat = new THREE.MeshBasicMaterial({
-      color: 0x8866ff,
+      color: 0xe8a050,
       transparent: true,
       opacity: 0.5,
       side: THREE.DoubleSide,
     });
-    const btnBorder = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.18), btnBorderMat);
-    btnBorder.position.y = -0.15;
-    btnBorder.position.z = 0.001;
-    this.root.add(btnBorder);
+    this.btnBorder = new THREE.Mesh(new THREE.PlaneGeometry(0.84, 0.18), btnBorderMat);
+    this.btnBorder.position.y = -0.15;
+    this.btnBorder.position.z = 0.001;
+    this.btnBorder.visible = false;
+    this.root.add(this.btnBorder);
   }
 
   private createTextCanvas(
@@ -139,7 +164,7 @@ export class WelcomePanel {
     });
 
     canvas.addEventListener("pointerdown", (e: PointerEvent) => {
-      if (e.button !== 0 || !this.root.visible) return;
+      if (e.button !== 0 || !this.root.visible || !this.ready) return;
       this.raycaster.setFromCamera(this.pointer, camera);
       const hits = this.raycaster.intersectObject(this.enterBtn);
       if (hits.length > 0) {
@@ -187,7 +212,7 @@ export class WelcomePanel {
       const controller = renderer.xr.getController(i);
 
       controller.addEventListener("selectstart", () => {
-        if (!this.root.visible) return;
+        if (!this.root.visible || !this.ready) return;
         const hovIdx = (controller as any).userData.welcomeHovered;
         if (hovIdx) {
           this.hide();
@@ -198,7 +223,7 @@ export class WelcomePanel {
       // Ray line
       const pts = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, -5)];
       const rayMat = new THREE.LineBasicMaterial({
-        color: 0x8866ff,
+        color: 0x5ce0d0,
         transparent: true,
         opacity: 0.5,
       });
@@ -214,7 +239,7 @@ export class WelcomePanel {
       const dot = new THREE.Mesh(
         new THREE.CircleGeometry(0.004, 12),
         new THREE.MeshBasicMaterial({
-          color: 0xcc99ff,
+          color: 0x5ce0d0,
           side: THREE.DoubleSide,
         }),
       );
@@ -238,10 +263,19 @@ export class WelcomePanel {
       // Change ray color on hover
       if (this.rayLines[i]) {
         const mat = this.rayLines[i].material as THREE.LineBasicMaterial;
-        mat.color.setHex(hovered ? 0xffcc44 : 0x8866ff);
+        mat.color.setHex(hovered ? 0xe8a050 : 0x5ce0d0);
         mat.opacity = hovered ? 0.8 : 0.5;
       }
     }
+  }
+
+  /** Call once the world has finished loading to enable the enter button. */
+  setReady(): void {
+    this.ready = true;
+    if (this.loadingLabel) this.loadingLabel.visible = false;
+    this.enterBtn.visible = true;
+    if (this.btnLabel) this.btnLabel.visible = true;
+    if (this.btnBorder) this.btnBorder.visible = true;
   }
 
   show(): void {
