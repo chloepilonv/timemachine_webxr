@@ -121,7 +121,7 @@ export class AudioManager {
    */
   stopTransition(): void {
     if (this.transitionSound.isPlaying) {
-      this.fadeOut(this.transitionSound, 500);
+      this.transitionSound.stop();
     }
   }
 

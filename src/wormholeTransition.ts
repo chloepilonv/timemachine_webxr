@@ -260,7 +260,11 @@ export class WormholeTransition {
     console.log("[Wormhole] Fading out");
     this.flashActive = true;
     this.flashStartTime = performance.now();
-    this.fadeToOpacity(0);
+    // Delay the opacity fade so the flash fully covers the swap
+    setTimeout(() => {
+      if (this.generation !== gen) return;
+      this.fadeToOpacity(0);
+    }, 600);
   }
 
   private fadeToOpacity(target: number): void {
