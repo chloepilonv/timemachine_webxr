@@ -11,7 +11,7 @@
 import * as THREE from "three";
 import { Era } from "./worlds.js";
 
-const AMBIENT_VOLUME = 0.15; // low — voice agent needs headroom
+const AMBIENT_VOLUME = 0.3; // moderate — voice agent still has headroom
 const CROSSFADE_MS = 800;
 const TRANSITION_VOLUME = 0.4;
 

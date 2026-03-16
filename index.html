@@ -200,17 +200,19 @@
         box-shadow: 0 0 20px rgba(80, 220, 140, 0.3);
       }
       .talk-floating.visible { display: block; }
+
     </style>
   </head>
   <body style="margin: 0">
     <!-- Main menu overlay -->
     <div id="main-menu">
       <h1>TIME MACHINE</h1>
+
       <div id="loading-status" class="subtitle" style="margin-top: 8px;">Loading world...</div>
       <div id="loading-bar-container">
         <div id="loading-bar"></div>
       </div>
-      <button id="enter-btn" class="menu-btn" disabled>Loading...</button>
+      <button id="enter-btn" class="menu-btn" disabled style="display: none;">Loading...</button>
       <button id="menu-talk-btn" class="menu-btn" style="display:none">Start Talking to Agent</button>
     </div>
 
