@@ -9,6 +9,8 @@ Built for Meta Quest 3 and Pico headsets. Also works in any WebXR-capable browse
 ## Demo
 
 <video src="DEMO_TIMEMACHINE.mp4" controls width="100%"></video>
+https://github.com/user-attachments/assets/a247df99-e190-49b6-b88a-6cc143cbf014
+
 
 ## Architecture
 
