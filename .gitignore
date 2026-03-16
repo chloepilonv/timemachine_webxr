@@ -147,3 +147,15 @@ public/splats/*.glb
 
 # Transition video (download from Google Drive)
 public/wormhole.mp4
+
+# Python
+__pycache__/
+*.pyc
+.DS_Store
+
+# World generation image tiles (large, tracked separately)
+tiles_present/
+tiles_past/
+tiles_future/
+ref_images/
+panoramas/

@@ -177,6 +177,72 @@ When entering VR, a 3D "TIME MACHINE" panel appears. Press **A** to enter the pr
 - **B** = travel to the previous era
 - Each era has its own AI agent with period-specific knowledge
 
+## World Generation Pipeline
+
+The `scripts/` and `prompts/` directories contain the pipeline that generates the source tiles and 3D worlds.
+
+```
+Location (URL / coords / place name)
+        |
+        v
+ [1] extract_tiles.py  -->  tiles_present/   (6 perspective tiles from Street View)
+        |
+        v
+ [2a] generate_past.py   -->  tiles_past/    (1920s: cobblestone, Model Ts, gas lamps)
+ [2b] generate_future.py -->  tiles_future/  (future: flying cars, robots, holograms)
+        |
+        v
+ [3] create_world.py  -->  World Labs 3D world (navigable Gaussian splat)
+```
+
+### World Gen Setup
+
+```bash
+pip install httpx python-dotenv pillow
+```
+
+Create a `.env` file with:
+```
+GOOGLE_API_KEY=...      # Places API + Map Tiles API + Street View enabled
+GEMINI_API_KEY=...      # Gemini 3 Pro (image editing)
+WORLDLABS_API_KEY=...   # World Labs Marble API
+```
+
+Required Google Cloud APIs (enable in [Google Cloud Console](https://console.cloud.google.com/apis/library)):
+- Places API (New)
+- Map Tiles API
+- Street View Static API
+
+### World Gen Usage
+
+```bash
+# Extract tiles from a place name
+python scripts/extract_tiles.py "Ferry Building, San Francisco" --tiles 6
+
+# From coordinates
+python scripts/extract_tiles.py 37.7955,-122.3937 --tiles 6
+
+# Generate 1920s versions
+python scripts/generate_past.py
+
+# Generate futuristic versions
+python scripts/generate_future.py
+
+# Create a 3D world from a tile
+python scripts/create_world.py image tiles_future/future_tile1_ferry_front.png
+
+# List all your worlds
+python scripts/create_world.py list
+```
+
+### Generated Worlds
+
+| Era | URL |
+|-----|-----|
+| Present | https://marble.worldlabs.ai/world/11223fe8-f431-41d6-9fe2-9bc277ddab0c |
+| Past | https://marble.worldlabs.ai/create/ad0f2d0d-044a-4eeb-b33f-df839462ec57 |
+| Future | https://marble.worldlabs.ai/world/5b917cba-1247-4287-8613-5a199e74d7da |
+
 ## Deployment
 
 Build and deploy the static output to any CDN/host:
@@ -200,9 +266,15 @@ timemachine_webxr/
 │   ├── worlds.ts            # Era definitions (past/present/future URLs)
 │   ├── timeMachineSystem.ts # ECS system for switching between eras
 │   ├── uiPanel.ts           # UI panel system — buttons, era display, XR toggle
-│   ├── convaiAgent.ts          # Convai voice agent + procedural idle animation
+│   ├── convaiAgent.ts       # Convai voice agent + procedural idle animation
 │   ├── gaussianSplatLoader.ts  # SparkJS splat loading/unloading/animation
 │   └── gaussianSplatAnimator.ts # GPU-accelerated fly-in/fly-out effects
+├── scripts/                 # World generation pipeline
+│   ├── extract_tiles.py     # Google Street View -> perspective tiles
+│   ├── generate_past.py     # tiles_present -> tiles_past via Gemini
+│   ├── generate_future.py   # tiles_present -> tiles_future via Gemini
+│   └── create_world.py      # Tiles -> World Labs 3D world
+├── prompts/                 # Gemini prompts for time period transforms
 ├── vite.config.ts           # Vite + IWSDK plugins
 └── package.json
 ```
@@ -250,5 +322,4 @@ This shows a lil-gui panel in the top-right corner with sliders for position, un
 
 ## Related
 
-- [timemachine](https://github.com/chloepilonv/timemachine) — Pipeline that generates the source tiles and World Labs worlds from Google Street View
 - [sensai-webxr-worldmodels](https://github.com/V4C38/sensai-webxr-worldmodels) — Original template this project is built on

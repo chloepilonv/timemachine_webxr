@@ -1,0 +1,41 @@
+PROMPT NANO3
+
+Strict in-place image edit only. This is NOT image generation — it is image modification.
+
+ABSOLUTE CAMERA LOCK — THIS OVERRIDES EVERYTHING:
+- Every building, wall, roofline, window, and architectural structure must remain in the EXACT same position, size, and angle.
+- The horizon, perspective lines, and vanishing points are FROZEN.
+- Do not move, add, or remove any building. Do not change building heights or shapes.
+- Do not shift, pan, tilt, zoom, crop, or recompose the image.
+- The output must overlay perfectly on the input — same pixel grid.
+
+WHAT TO CHANGE (surfaces and objects only, never structure):
+
+Ground surface:
+- Re-texture all modern pavement, concrete, and asphalt as cobblestone or packed dirt
+- Add streetcar rail tracks embedded in the road surface where roads exist
+
+Remove these modern objects:
+- Modern cars, scooters, bikes → replace with Ford Model T cars, horse-drawn carts and wagons in the same positions
+- Palm trees → replace with bare wooden telegraph poles with overhead wires
+- Modern lamp posts and traffic lights → replace with gas street lamps
+- Contemporary sculptures and public art (like the large human figure statue) → remove, leave empty space or add a simple period-appropriate element
+- Modern street furniture (metal bollards, bike racks, benches, digital signs) → remove or replace with wooden crates, barrels
+- Modern signage → replace with hand-painted signs (cigars, dry goods, oysters, bakery)
+
+Re-skin building facades (keep geometry identical):
+- Modern glass facades → re-texture as brick or stone with arched windows and ornate cornices
+- Keep every building exactly the same shape and size, just change the surface material to look 1920s
+- Add awnings, painted signage on building walls
+
+People:
+- Re-dress existing pedestrians in 1920s clothing (suits, fedoras, long coats, dresses)
+- Keep them in the same positions
+
+Visual style:
+- REALISTIC NATURAL COLORS — do NOT use sepia, do NOT desaturate, do NOT add vintage film effects
+- Full color, as if a modern camera photographed the 1920s scene
+- Natural daylight, realistic sky colors
+- No film grain, no vignette, no fading
+
+CRITICAL: The buildings are the skeleton — do NOT move them. Only change their skin.

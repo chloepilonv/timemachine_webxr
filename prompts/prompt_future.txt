@@ -1,0 +1,56 @@
+PROMPT FUTURE
+
+Strict in-place image edit only. This is NOT image generation — it is image modification.
+
+ABSOLUTE CAMERA LOCK — THIS OVERRIDES EVERYTHING:
+- Every building, wall, roofline, window, and architectural structure must remain in the EXACT same position, size, and angle.
+- The horizon, perspective lines, and vanishing points are FROZEN.
+- Do not move, add, or remove any building. Do not change building heights or shapes.
+- Do not shift, pan, tilt, zoom, crop, or recompose the image.
+- The output must overlay perfectly on the input — same pixel grid.
+
+WHAT TO CHANGE (surfaces and objects only, never structure):
+
+Ground surface:
+- Re-texture all roads as smooth, luminous smart-surface material with faint glowing lane guide lines
+- Add subtle embedded light strips along curbs and crosswalks
+
+Replace these present-day objects:
+- Modern cars → replace with sleek flying vehicles hovering just above the road, and autonomous pods on the ground
+- Buses, trucks → replace with transparent-walled autonomous transit pods
+- Traffic lights → replace with floating holographic traffic signals
+- Lamp posts → replace with slim poles topped with soft glowing orbs or holographic light panels
+- Street signs → replace with floating holographic displays showing directions and info
+- Bikes, scooters → replace with hoverboards and personal hover-discs
+
+Add futuristic elements in open spaces (do not cover buildings):
+- Humanoid robots walking among pedestrians
+- Small delivery drones flying at mid-height between buildings
+- Holographic billboards and advertisements floating in the air
+- Transparent sky-bridges or walkways connecting upper floors of buildings
+- Vertical garden panels on building facades (keep building shape, add green surface)
+- Rooftop solar panel arrays and small wind turbines visible on building tops
+
+Re-skin building facades (keep geometry identical):
+- Add sleek glass, metallic, or carbon-fiber cladding over existing facades
+- Keep every building exactly the same shape and size, just change surface to look futuristic
+- Add glowing accent lines along building edges and window frames
+- Holographic signage on building walls replacing current signs
+
+People:
+- Re-dress existing pedestrians in futuristic clothing (fitted jumpsuits, light-up accessories, augmented reality visors)
+- Keep them in the same positions
+- Add a few humanoid robots walking naturally among the crowd
+
+Sky:
+- Keep the natural sky but add a few flying vehicles in the distance
+- Subtle contrails from sky-taxis
+
+Visual style:
+- REALISTIC NATURAL COLORS — do NOT use neon overload, do NOT make it look like a video game
+- Full color, as if a modern camera photographed a real future city
+- Natural daylight, realistic sky colors
+- Clean, bright, optimistic — not dystopian or dark
+- No excessive glow, no bloom effects, no sci-fi filters
+
+CRITICAL: The buildings are the skeleton — do NOT move them. Only change their skin. Keep it CONTINUOUS with the original photo — same exact viewpoint, same geometry, same composition.
