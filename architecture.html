@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Time Machine — Architecture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --copper: #d4915a;
+    --copper-bright: #e8a050;
+    --copper-dim: rgba(212,145,90,0.25);
+    --copper-glow: rgba(212,145,90,0.08);
+    --cyan: #5ce0d0;
+    --cyan-dim: rgba(92,224,208,0.2);
+    --cyan-glow: rgba(92,224,208,0.06);
+    --violet: #a87cda;
+    --violet-dim: rgba(168,124,218,0.2);
+    --rose: #e0607a;
+    --rose-dim: rgba(224,96,122,0.2);
+    --gold: #d4a574;
+    --gold-dim: rgba(212,165,116,0.2);
+    --lime: #7ad860;
+    --lime-dim: rgba(122,216,96,0.15);
+    --bg: #08080c;
+    --surface: #0e0e14;
+    --surface-raised: #14141c;
+    --text: #e8e4de;
+    --text-dim: rgba(200,196,190,0.45);
+    --text-mid: rgba(200,196,190,0.65);
+    --border: rgba(200,196,190,0.08);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── STARFIELD ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.5), transparent),
+      radial-gradient(1px 1px at 28% 62%, rgba(255,255,255,0.3), transparent),
+      radial-gradient(1.2px 1.2px at 45% 8%, rgba(200,180,255,0.6), transparent),
+      radial-gradient(1px 1px at 67% 44%, rgba(255,255,255,0.25), transparent),
+      radial-gradient(1px 1px at 82% 72%, rgba(255,255,255,0.4), transparent),
+      radial-gradient(1.2px 1.2px at 5% 88%, rgba(180,200,255,0.5), transparent),
+      radial-gradient(1px 1px at 93% 15%, rgba(255,255,255,0.35), transparent),
+      radial-gradient(1px 1px at 38% 92%, rgba(255,220,200,0.3), transparent),
+      radial-gradient(1px 1px at 55% 35%, rgba(255,255,255,0.2), transparent),
+      radial-gradient(1.5px 1.5px at 75% 58%, rgba(200,200,255,0.45), transparent);
+    animation: drift 40s linear infinite;
+  }
+  @keyframes drift {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-20px); }
+  }
+
+  /* ── CANVAS ── */
+  .canvas {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 56px 48px 80px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+  .header h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    color: var(--copper-bright);
+    text-shadow: 0 0 40px rgba(232,160,80,0.2);
+  }
+  .header .tagline {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 500;
+    letter-spacing: 0.5em;
+    color: var(--text-dim);
+    margin-top: 8px;
+    text-transform: uppercase;
+  }
+
+  /* ── PHASE LABEL ── */
+  .phase {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    margin-top: 56px;
+  }
+  .phase:first-of-type { margin-top: 0; }
+  .phase-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    padding: 6px 14px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .phase-num.gen {
+    background: var(--copper-glow);
+    border: 1px solid var(--copper-dim);
+    color: var(--copper);
+  }
+  .phase-num.xr {
+    background: var(--cyan-glow);
+    border: 1px solid var(--cyan-dim);
+    color: var(--cyan);
+  }
+  .phase-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .phase-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    color: var(--text-dim);
+  }
+
+  /* ── NODE ── */
+  .node {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 0 24px;
+    align-items: start;
+    transition: border-color 0.3s;
+  }
+  .node:hover {
+    border-color: rgba(200,196,190,0.15);
+  }
+  .node-icon {
+    grid-row: 1 / 3;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+  .node-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .node-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  }
+  .node-script {
+    font-size: 0.65rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 3px;
+    background: rgba(200,196,190,0.06);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .node-body {
+    grid-column: 2;
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    line-height: 1.65;
+    font-weight: 400;
+  }
+  .node-body strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* node accent colors */
+  .node.c-copper .node-icon { background: var(--copper-glow); border: 1.5px solid var(--copper-dim); }
+  .node.c-copper .node-title { color: var(--copper); }
+
+  .node.c-cyan .node-icon { background: var(--cyan-glow); border: 1.5px solid var(--cyan-dim); }
+  .node.c-cyan .node-title { color: var(--cyan); }
+
+  .node.c-violet .node-icon { background: rgba(168,124,218,0.06); border: 1.5px solid var(--violet-dim); }
+  .node.c-violet .node-title { color: var(--violet); }
+
+  .node.c-rose .node-icon { background: rgba(224,96,122,0.06); border: 1.5px solid var(--rose-dim); }
+  .node.c-rose .node-title { color: var(--rose); }
+
+  .node.c-gold .node-icon { background: rgba(212,165,116,0.06); border: 1.5px solid var(--gold-dim); }
+  .node.c-gold .node-title { color: var(--gold); }
+
+  .node.c-lime .node-icon { background: rgba(122,216,96,0.06); border: 1.5px solid var(--lime-dim); }
+  .node.c-lime .node-title { color: var(--lime); }
+
+  /* ── PARALLEL SPLIT ── */
+  .parallel-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .parallel-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+  }
+  .parallel-label::before, .parallel-label::after {
+    content: '';
+    width: 40px;
+    height: 1px;
+    background: var(--border);
+  }
+  .parallel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .parallel-grid .node {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 24px 20px;
+  }
+  .parallel-grid .node-icon {
+    margin: 0 auto 12px;
+    grid-row: auto;
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+  }
+  .parallel-grid .node-head {
+    justify-content: center;
+  }
+  .parallel-grid .node-body {
+    grid-column: 1;
+    text-align: center;
+    font-size: 0.75rem;
+  }
+  .parallel-grid .node-script {
+    display: block;
+    margin-top: 6px;
+    text-align: center;
+  }
+
+  /* ── CONNECTOR ARROWS ── */
+  .connector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    margin-bottom: 20px;
+    position: relative;
+  }
+  .connector::before {
+    content: '';
+    position: absolute;
+    width: 1.5px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--copper-dim), transparent);
+  }
+  .connector-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--copper);
+    opacity: 0.4;
+    position: relative;
+    z-index: 1;
+  }
+  .connector.cyan::before { background: linear-gradient(to bottom, var(--cyan-dim), transparent); }
+  .connector.cyan .connector-dot { background: var(--cyan); }
+
+  /* ── ERAS STRIP ── */
+  .eras {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  .era-card {
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid;
+    text-align: center;
+  }
+  .era-card .era-icon { font-size: 28px; margin-bottom: 8px; }
+  .era-card .era-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+  }
+  .era-card .era-detail {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .era-card.past {
+    border-color: var(--gold-dim);
+    background: rgba(212,165,116,0.03);
+  }
+  .era-card.past .era-name { color: var(--gold); }
+  .era-card.present {
+    border-color: var(--cyan-dim);
+    background: rgba(92,224,208,0.03);
+  }
+  .era-card.present .era-name { color: var(--cyan); }
+  .era-card.future {
+    border-color: var(--violet-dim);
+    background: rgba(168,124,218,0.03);
+  }
+  .era-card.future .era-name { color: var(--violet); }
+
+  /* ── TECH PILLS ── */
+  .tech-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .tech-row.centered { justify-content: center; }
+  .tech {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.48rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 3px 10px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    margin-top: 72px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-stack {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.5rem;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+  }
+  .footer .tech-row {
+    justify-content: center;
+  }
+
+  /* ── SVG FLOW LINES ── */
+  .flow-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* ── STEP NUMBER ── */
+  .step-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.45rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    position: absolute;
+    top: -8px;
+    left: 32px;
+    background: var(--surface);
+    padding: 0 6px;
+  }
+</style>
+</head>
+<body>
+
+<div class="canvas">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>TIME MACHINE</h1>
+    <div class="tagline">Architecture &amp; Pipeline</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PHASE 1: WORLD GENERATION              -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="phase">
+    <span class="phase-num gen">PHASE 1</span>
+    <span class="phase-title">WORLD GENERATION</span>
+    <span class="phase-line"></span>
+    <span class="phase-title" style="color:rgba(212,145,90,0.3)">PYTHON</span>
+  </div>
+
+  <!-- 1. USER INPUT -->
+  <div class="node c-copper" style="position:relative;">
+    <span class="step-num">01</span>
+    <div class="node-icon">📍</div>
+    <div>
+      <div class="node-head">
+        <span class="node-title">USER INPUT</span>
+      </div>
+      <div class="node-body">
+        User provides a location &mdash; place name, GPS coordinates, or a Google Maps Street View URL.
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-dot"></div></div>
+
+  <!-- 2. GOOGLE MAPS -->
+  <div class="node c-copper" style="position:relative;">
+    <span class="step-num">02</span>
+    <div class="node-icon">🌐</div>
+    <div>
+      <div class="node-head">
+        <span class="node-title">GOOGLE MAPS API</span>
+        <span class="node-script">extract_tiles.py</span>
+      </div>
+      <div class="node-body">
+        Fetches the Street View 360&deg; panorama for the location. Discovers nearby panoramas, picks the best one (highest resolution, least sky). Stitches a full equirectangular image, then slices it into <strong>6 perspective tiles</strong> at 90&deg; FOV each.
+        <div class="tech-row">
+          <span class="tech">Places API</span>
+          <span class="tech">Map Tiles API</span>
+          <span class="tech">Street View Static API</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-dot"></div></div>
+
+  <!-- 3. PARALLEL: GEMINI TRANSFORMS -->
+  <div class="parallel-wrapper">
+    <div class="parallel-label">PARALLEL &mdash; FROM PRESENT TILES</div>
+    <div class="parallel-grid">
+
+      <!-- Present → direct -->
+      <div class="node c-cyan">
+        <div class="node-icon">🏙️</div>
+        <div>
+          <div class="node-head">
+            <span class="node-title">PRESENT</span>
+          </div>
+          <div class="node-body">
+            Original tiles pass through directly &mdash; no editing needed. Full resolution from Street View.
+          </div>
+        </div>
+      </div>
+
+      <!-- Past -->
+      <div class="node c-gold">
+        <div class="node-icon">🏛️</div>
+        <div>
+          <div class="node-head">
+            <span class="node-title">PAST &middot; 1920s</span>
+          </div>
+          <div class="node-body">
+            <strong>Gemini 3 Pro</strong> image editing with strict camera-lock prompts. Transforms surfaces to cobblestone, Model Ts, gas lamps, period signage. Fed with <strong>reference images</strong> of historical architecture.
+            <span class="node-script">generate_past.py</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Future -->
+      <div class="node c-violet">
+        <div class="node-icon">🚀</div>
+        <div>
+          <div class="node-head">
+            <span class="node-title">FUTURE &middot; 2150</span>
+          </div>
+          <div class="node-body">
+            <strong>Gemini 3 Pro</strong> image editing. Same camera lock &mdash; transforms to flying vehicles, holographic displays, vertical gardens, smart surfaces. Clean, optimistic aesthetic.
+            <span class="node-script">generate_future.py</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-dot"></div></div>
+
+  <!-- 4. UPSCALE -->
+  <div class="node c-lime" style="position:relative;">
+    <span class="step-num">04</span>
+    <div class="node-icon">🔬</div>
+    <div>
+      <div class="node-head">
+        <span class="node-title">RESOLUTION ENHANCEMENT</span>
+      </div>
+      <div class="node-body">
+        Gemini outputs at ~1070px &mdash; too low for sharp Gaussian splats. <strong>FLUX.2 Pro</strong> regenerates tiles at higher resolution with canny conditioning for structure lock. <strong>Real-ESRGAN</strong> upscales as a fallback path (2&times; super-resolution).
+        <div class="tech-row">
+          <span class="tech">FLUX.2 Pro</span>
+          <span class="tech">Real-ESRGAN</span>
+          <span class="tech">Replicate / fal.ai</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-dot"></div></div>
+
+  <!-- 5. WORLD LABS -->
+  <div class="node c-copper" style="position:relative;">
+    <span class="step-num">05</span>
+    <div class="node-icon">✨</div>
+    <div>
+      <div class="node-head">
+        <span class="node-title">WORLD LABS MARBLE API</span>
+        <span class="node-script">create_world.py</span>
+      </div>
+      <div class="node-body">
+        Each set of tiles is fed to World Labs to generate a navigable <strong>Gaussian splat world</strong>. Supports up to 4 images per world with azimuth hints. Outputs compressed <strong>.SPZ files</strong> (~20&ndash;30 MB each) &mdash; photorealistic 3D environments.
+        <div class="tech-row">
+          <span class="tech">Marble 0.1-mini</span>
+          <span class="tech">Gaussian Splatting</span>
+          <span class="tech">.SPZ Format</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ -->
+  <!-- PHASE 2: WEBXR EXPERIENCE              -->
+  <!-- ═══════════════════════════════════════ -->
+  <div class="phase">
+    <span class="phase-num xr">PHASE 2</span>
+    <span class="phase-title">WEBXR EXPERIENCE</span>
+    <span class="phase-line"></span>
+    <span class="phase-title" style="color:rgba(92,224,208,0.3)">TYPESCRIPT</span>
+  </div>
+
+  <!-- 6. WEBXR APP -->
+  <div class="node c-cyan" style="position:relative;">
+    <span class="step-num">06</span>
+    <div class="node-icon">🥽</div>
+    <div>
+      <div class="node-head">
+        <span class="node-title">IMMERSIVE WEBXR APP</span>
+      </div>
+      <div class="node-body">
+        Loads all three Gaussian splat worlds into an immersive WebXR scene. <strong>IWSDK</strong> provides the ECS framework with locomotion, grabbing, and spatial UI panels. <strong>SparkJS 2.0</strong> handles GPU-accelerated splat rendering with LOD and foveation. Runs on Quest 3, Pico, or any WebXR browser.
+        <div class="tech-row">
+          <span class="tech">IWSDK 0.2</span>
+          <span class="tech">SparkJS 2.0</span>
+          <span class="tech">Three.js</span>
+          <span class="tech">Vite</span>
+          <span class="tech">HTTPS</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector cyan"><div class="connector-dot"></div></div>
+
+  <!-- 7. WORMHOLE -->
+  <div class="node c-rose" style="position:relative;">
+    <span class="step-num">07</span>
+    <div class="node-icon">🌀</div>
+    <div>
+      <div class="node-head">
+        <span class="node-title">WORMHOLE TRANSITION</span>
+      </div>
+      <div class="node-body">
+        When switching eras: a fullscreen <strong>video sphere</strong> (cylinder + caps) envelops the viewer, playing a cosmic wormhole at 2.5&times; speed. A white flash fires as the new splat loads behind the effect. Ambient audio <strong>crossfades</strong> between era-specific tracks. Wormhole transition audio plays simultaneously. The old world unloads, the new one streams in.
+        <div class="tech-row">
+          <span class="tech">Video Sphere</span>
+          <span class="tech">ShaderMaterial</span>
+          <span class="tech">Audio Crossfade</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector cyan"><div class="connector-dot"></div></div>
+
+  <!-- 8. AI AGENTS -->
+  <div class="node c-cyan" style="position:relative;">
+    <span class="step-num">08</span>
+    <div class="node-icon">🤖</div>
+    <div>
+      <div class="node-head">
+        <span class="node-title">CONVAI AI AGENTS</span>
+      </div>
+      <div class="node-body">
+        A <strong>space maintenance robot</strong> (.glb model) floats in each era with a procedural idle animation (bob, tilt, drift). Powered by <strong>3 individual Convai characters</strong> &mdash; each with their own ID, personality, and period-specific knowledge. Voice interaction via <strong>push-to-talk</strong> (grip) or toggle (X button) with gRPC streaming for real-time conversation.
+        <div class="tech-row">
+          <span class="tech">Convai Web SDK</span>
+          <span class="tech">gRPC Streaming</span>
+          <span class="tech">3 Character IDs</span>
+          <span class="tech">.glb Model</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector cyan"><div class="connector-dot"></div></div>
+
+  <!-- 9. THREE ERAS -->
+  <div class="eras">
+    <div class="era-card past">
+      <div class="era-icon">🏛️</div>
+      <div class="era-name">1920s</div>
+      <div class="era-detail">
+        Cobblestone streets<br>
+        Model Ts &amp; gas lamps<br>
+        Historian AI guide<br>
+        Period ambient audio
+      </div>
+    </div>
+    <div class="era-card present">
+      <div class="era-icon">🏙️</div>
+      <div class="era-name">PRESENT</div>
+      <div class="era-detail">
+        SF Ferry Building today<br>
+        Original Street View data<br>
+        Contemporary guide<br>
+        Urban ambient audio
+      </div>
+    </div>
+    <div class="era-card future">
+      <div class="era-icon">🚀</div>
+      <div class="era-name">2150</div>
+      <div class="era-detail">
+        Flying vehicles &amp; holograms<br>
+        Vertical gardens<br>
+        Futurist AI guide<br>
+        Sci-fi ambient audio
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-stack">FULL STACK</div>
+    <div class="tech-row centered">
+      <span class="tech">Google Maps APIs</span>
+      <span class="tech">Gemini 3 Pro</span>
+      <span class="tech">FLUX.2</span>
+      <span class="tech">Real-ESRGAN</span>
+      <span class="tech">World Labs Marble</span>
+      <span class="tech">Gaussian Splatting</span>
+      <span class="tech">WebXR</span>
+      <span class="tech">IWSDK</span>
+      <span class="tech">SparkJS</span>
+      <span class="tech">Three.js</span>
+      <span class="tech">Convai AI</span>
+      <span class="tech">Vite</span>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
