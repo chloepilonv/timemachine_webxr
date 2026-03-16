@@ -1,8 +1,10 @@
 # Time Machine WebXR
 
-Travel through time at the San Francisco Ferry Building — explore the same location in the 1920s, present day, and a speculative future, all in immersive WebXR.
+Prompt any real-world location and travel through time — explore it in the 1920s, present day, and a speculative future, all in immersive WebXR. The pipeline extracts Google Street View tiles, transforms them across time periods using Gemini Imagen, upscales with FLUX.2, and generates navigable 3D Gaussian splat worlds via World Labs.
 
-Built for Pico headsets. Also works in any WebXR-capable browser with the included headset simulator.
+This demo focuses on the **San Francisco Ferry Building**.
+
+Built for Meta Quest 3 and Pico headsets. Also works in any WebXR-capable browser with the included headset simulator.
 
 ## Architecture
 
@@ -12,8 +14,8 @@ Built for Pico headsets. Also works in any WebXR-capable browser with the includ
 
 | Past (1920s) | Present | Future (2150) |
 |:---:|:---:|:---:|
-| ![Past 1](screenshots/screenshot_past1_timemachine.png) | ![Present](screenshots/screenshot_present_timemachine.png) | ![Future 1](screenshots/screenshot_future1_timemachine.png) |
-| ![Past 2](screenshots/screenshot_past2_timemachine.png) | | ![Future 2](screenshots/screenshot_future2_timemachine.png) |
+| ![Past 1](screenshots/screenshot_past1_timemachine.png) | ![Present 1](screenshots/screenshot_present1_timemachine.png) | ![Future 1](screenshots/screenshot_future1_timemachine.png) |
+| ![Past 2](screenshots/screenshot_past2_timemachine.png) | ![Present 2](screenshots/screenshot_present2_timemachine.png) | ![Future 2](screenshots/screenshot_future2_timemachine.png) |
 
 ## How It Works
 
